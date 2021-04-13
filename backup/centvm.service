@@ -1,0 +1,14 @@
+
+[Unit]
+Description=CentVM - PHP-based PXE Panel
+After=network.target
+
+[Service]
+Type=simple
+User=root
+ExecStart=sh /var/www/html/pxe_panel/backup/custom_start.sh
+Restart=on-abort
+
+
+[Install]
+WantedBy=multi-user.target

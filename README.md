@@ -13,6 +13,8 @@
 <img src="pics/4.png"><br>
 <b>PXE Message Page</b></br>
 <img src="pics/5.png"><br>
+<b>PXE Boot Page Generator</b></br>
+<img src="pics/6.png"><br>
 </center><br>
 <pre>
 NOTE : This program has been written for legal purposes. 

@@ -1,5 +1,5 @@
-# CentVM PXE Web Server UI | PHP 7.2+
-<center><b>CentVM PXE Web Server UI | PHP 7.2+</b></center><br>
+# CentVM PXE / NetBoot Web Server UI | PHP 7.2+
+<center><b>CentVM PXE / NetBoot Web Server UI | PHP 7.2+</b></center><br>
 <br>
 
 <center>

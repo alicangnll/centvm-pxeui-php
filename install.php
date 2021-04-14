@@ -305,7 +305,7 @@ $headers[] = 'Cookie: __gads=ID=bbdf811cdcc5a441-22401f55f9b8009e:T=1602771440:R
 	
 		<div class="form-group">
   <label for="exampleInputEmail1">SQL Database</label>
-  <input type="text" class="form-control" name="sqldb" placeholder="pxe_boot">
+  <input type="text" class="form-control" name="sqldb" value="pxe_boot" placeholder="pxe_boot" readonly>
 	</div>
 	<button type="submit" class="btn btn-dark">İleri / Next</button>
 	</form></div></div></body>';

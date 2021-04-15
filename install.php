@@ -26,7 +26,18 @@ body {
   justify-content: center;
 }
 </style>';
-
+if(file_exists("yukle.lock")) {
+	  		die('<div class="container mx-auto mt-5 card">
+		<div class="card-body">
+		<b>Yukle.Lock / File Found</b>
+		<hr>
+		<code>Yukle.Lock dosyası bulundu</code><br>
+		<div class="form-group">
+		<br><br><a href="install.php?git=index" class="btn btn-dark">Yenile / Refresh<br>
+		</a></div></div></div>');
+	  } else {
+		  
+	  }
 if(!isset($_GET['git'])) {
 $sayfa = 'index';
 } elseif(empty($_GET['git'])) {

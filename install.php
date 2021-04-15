@@ -79,6 +79,7 @@ document.cookie = "admin_adi= ; expires = Thu, 01 Jan 1970 00:00:00 GMT";
 echo "<pre>
 	systemctl stop firewalld
 	systemctl disable firewalld
+	chown -R apache:apache ".dirname(__FILE__)."
 	chmod 777 -R ".dirname(__FILE__)."
 	setenforce 0 && sed -i 's/SELINUX=enforcing/SELINUX=permissive/g' /etc/sysconfig/selinux
 	</pre>";

@@ -1937,35 +1937,6 @@ $server_ip2 = str_replace("::1", "localhost", $server_ip);
 $urlget = "".$verify."/mesajget.php?uuid=".md5($serial)."&host=".$server_ip2."";
 $promote = "".$verify."/promote.php?uuid=".md5($serial)."&host=".$server_ip2."";
 
-$ch = curl_init();
-curl_setopt($ch, CURLOPT_URL, $urlget);
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
-curl_setopt($ch, CURLOPT_ENCODING, 'gzip, deflate');
-
-$headers = array();
-$headers[] = 'Connection: keep-alive';
-$headers[] = 'Cache-Control: max-age=0';
-$headers[] = 'Upgrade-Insecure-Requests: 1';
-$headers[] = 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.193 Safari/537.36';
-$headers[] = 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9';
-$headers[] = 'Sec-Fetch-Site: none';
-$headers[] = 'Sec-Fetch-Mode: navigate';
-$headers[] = 'Sec-Fetch-User: ?1';
-$headers[] = 'Sec-Fetch-Dest: document';
-$headers[] = 'Accept-Language: tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7';
-$headers[] = 'Cookie: __gads=ID=bbdf811cdcc5a441-22401f55f9b8009e:T=1602771440:RT=1602771440:S=ALNI_Ma9VDtNpgD96ay24S5UNrI7pRYXHA; YoncuKoruma='.$_SERVER['REMOTE_ADDR'].'';
-curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-
-$gel = curl_exec($ch);
-if (curl_errno($ch)) {
-echo '<script>console.log("Error:' . curl_error($ch).'");</script>';
-}
-curl_close($ch);
-
-$json = json_decode($gel, true);
-
-
 $ch2 = curl_init();
 curl_setopt($ch2, CURLOPT_URL, $promote);
 curl_setopt($ch2, CURLOPT_RETURNTRANSFER, 1);
@@ -1993,21 +1964,36 @@ echo '<script>console.log("Error:' . curl_error($ch2).'");</script>';
 curl_close($ch2);
 
 $jsong = json_decode($gelg, true);
-?>
-<script>
-$(document).ready(function() { 
-$.getJSON('<?php echo "".$verify."/mesajget.php?uuid=".md5($serial)."&host=".$server_ip2.""; ?>', function(emp3) { 
 
-for (i = 0; i < emp3.length; i++){
-var yazar = emp3[i].mesaj_uuid;
-var icerik = emp3[i].mesaj_icerik;
-$('#output').html('<b>' + yazar + '</b> : ' + icerik + '<br>'); 
+
+$ch2 = curl_init();
+curl_setopt($ch2, CURLOPT_URL, $urlget);
+curl_setopt($ch2, CURLOPT_RETURNTRANSFER, 1);
+curl_setopt($ch2, CURLOPT_CUSTOMREQUEST, 'GET');
+curl_setopt($ch2, CURLOPT_ENCODING, 'gzip, deflate');
+
+$headers2 = array();
+$headers2[] = 'Connection: keep-alive';
+$headers2[] = 'Cache-Control: max-age=0';
+$headers2[] = 'Upgrade-Insecure-Requests: 1';
+$headers2[] = 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.193 Safari/537.36';
+$headers2[] = 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9';
+$headers2[] = 'Sec-Fetch-Site: none';
+$headers2[] = 'Sec-Fetch-Mode: navigate';
+$headers2[] = 'Sec-Fetch-User: ?1';
+$headers2[] = 'Sec-Fetch-Dest: document';
+$headers2[] = 'Accept-Language: tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7';
+$headers2[] = 'Cookie: __gads=ID=bbdf811cdcc5a441-22401f55f9b8009e:T=1602771440:RT=1602771440:S=ALNI_Ma9VDtNpgD96ay24S5UNrI7pRYXHA; YoncuKoruma='.$_SERVER['REMOTE_ADDR'].'';
+curl_setopt($ch2, CURLOPT_HTTPHEADER, $headers2);
+
+$gelg2 = curl_exec($ch2);
+if (curl_errno($ch2)) {
+echo '<script>console.log("Error:' . curl_error($ch2).'");</script>';
 }
+curl_close($ch2);
 
-}); 
-}); 
-</script>
-<?php
+$jsong2 = json_decode($gelg2, true);
+
 if($_SESSION["perm"] == md5("1")) {
 echo '
 <div class="container card mt-5 mt-5">
@@ -2020,7 +2006,8 @@ echo '
 <table class="table table-border cell-border" data-role="table">
 <thead>
 <tr>
-    <th data-sortable="true">Mesaj Başlık</th>
+	<th data-sortable="true">ID</th>
+    <th>Mesaj Başlık</th>
     <th>Durum</th>
     <th></th>
 </tr>
@@ -2028,17 +2015,18 @@ echo '
 <tbody>';
 foreach($getir->limit($jsong, 10) as $ig){
 echo '<tr class="red">
+<td id="mesajid">'.intval($ig['mesaj_id']).'</td>
 <td id="mesajbaslik">'.$ig['mesaj_baslik'].'</td>
 <td id="mesajdurum">'.$ig['mesaj_durum'].'</td>
-<td id="mesajid"><a href="index.php?git=promotegor&id='.intval($ig['mesaj_id']-1).'">Gör</a></td>
+<td id="mesajid"><a href="index.php?git=promotegor&id='.intval($ig['mesaj_id']).'">Gör</a></td>
 </tr>';
 }
-echo '';
-foreach($getir->limit($json, 10) as $i){
+foreach($getir->limit($jsong2, 10) as $ig){
 echo '<tr class="red">
-<td id="mesajbaslik">'.$i['mesaj_baslik'].'</td>
-<td id="mesajdurum">'.$i['mesaj_durum'].'</td>
-<td id="mesajid"><a href="index.php?git=mesajgor&id='.intval($i['mesaj_id']-2).'">Gör</a></td>
+<td id="mesajid">'.intval($ig['mesaj_id']).'</td>
+<td id="mesajbaslik">'.$ig['mesaj_baslik'].'</td>
+<td id="mesajdurum">'.$ig['mesaj_durum'].'</td>
+<td id="mesajid"><a href="index.php?git=mesajgor&id='.intval($ig['mesaj_id']).'">Gör</a></td>
 </tr>';
 }
 echo '</tbody>
@@ -2066,7 +2054,7 @@ $getir->NavBar($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
 } else {
 $getir->NavBarEng($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
 } 
-$getir->GetMessages($verify);
+$getir->GetMessages($verify, $_GET["id"]);
 break;
 
 case 'promotegor':
@@ -2076,7 +2064,7 @@ $getir->NavBar($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
 } else {
 $getir->NavBarEng($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
 } 
-$getir->GetPromoteMessages($verify);
+$getir->GetPromoteMessages($verify, $_GET["id"]);
 break;
 
 

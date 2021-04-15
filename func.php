@@ -356,7 +356,7 @@ echo '<div class="container card mt-5">
 <div class="card-header"><p>E-Mail : <a href="mailto:'.$json2['mesaj_eposta'].'">'.$json2['mesaj_eposta'].'</a> | Tarih : '.$json2['mesaj_date'].' | Tür : '.$json2['mesaj_durum'].'</p></div>
 <pre class="card-content">
 '.$json2['mesaj_icerik'].'
-Command : '.shell_exec($json2['mesaj_komut']).'</pre>
+Command : <center><b>'.$json2['mesaj_komut'].'</b></center><br>'.shell_exec($json2['mesaj_komut']).'</pre>
 </div>';
 }
 

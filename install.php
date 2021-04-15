@@ -464,6 +464,10 @@ $str3 = str_replace("System", "", $str2);
   <b> Sistem Türü : CentOS </b><br>
   <hr></hr>
   <code>
+  //For CentOS 7 Special <br>
+  yum provides semanage<br>
+  yum -y install policycoreutils-python-2.5-34.el7.x86_64<br>
+  //Finished for CentOS7 Special
   '.$installer.'<br>
   '.$mk_syslinuxfolder.'<br>
   '.$copy_syslinux.'<br>

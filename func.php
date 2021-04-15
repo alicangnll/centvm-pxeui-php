@@ -763,6 +763,7 @@ function GetLangJSON($links) {
 $jsons2 = file_get_contents($links, true);
 $objs2 = json_decode($jsons2, true);
 $_SESSION["lang"] = $objs2["lang"];
+echo '<script>document.cookie = "lang='.strip_tags($objs2["lang"]).'; expires=Thu, 18 Dec 2013 12:00:00 UTC; path=/";</script>';
 }
 
 function GetUpdJSON($link, $link2) {

@@ -56,6 +56,15 @@ switch ($sayfa) {
 	<a type="button" href="install.php?git=first_install" class="btn btn-dark">Devam Et</a>
   </div>
   </div></body>';
+  ?>
+<script>
+document.cookie = "rootpwd= ; expires = Thu, 01 Jan 1970 00:00:00 GMT";
+document.cookie = "netwdrv= ; expires = Thu, 01 Jan 1970 00:00:00 GMT";
+document.cookie = "lang= ; expires = Thu, 01 Jan 1970 00:00:00 GMT";
+document.cookie = "user_id= ; expires = Thu, 01 Jan 1970 00:00:00 GMT";
+document.cookie = "admin_adi= ; expires = Thu, 01 Jan 1970 00:00:00 GMT";
+</script>
+<?php
   break;
 
 	case 'first_install':
@@ -167,19 +176,40 @@ fwrite($fp,$txt);
 fclose($fp);
 }
 	if(empty($_POST["rootpwd"])) {
-		die("Root Password Not Found");
+		die('<div class="mx-auto card">
+		<div class="card-body">
+		<b>Doğrulama Yapılamadı</b>
+		<hr>
+		<code>Root Password Not Found</code><br>
+		<div class="form-group">
+		<br><br><a href="install.php?git=license" class="btn btn-dark">Yenile / Refresh<br>
+		</a></div></div></div>');
 	} else {
 		setcookie("rootpwd", strip_tags($_POST["rootpwd"]), time()+3600);
 	}
 	
 	if(empty($_POST["netwdrv"])) {
-	die("Network Driver Not Found");
+		die('<div class="mx-auto card">
+		<div class="card-body">
+		<b>Doğrulama Yapılamadı</b>
+		<hr>
+		<code>Network Driver Not Found</code><br>
+		<div class="form-group">
+		<br><br><a href="install.php?git=license" class="btn btn-dark">Yenile / Refresh<br>
+		</a></div></div></div>');
 	} else {
 		setcookie("netwdrv", strip_tags($_POST["netwdrv"]), time()+3600);
 	}
 	
 	if(empty($_POST["lang"])) {
-		die("Language Not Found");
+		die('<div class="mx-auto card">
+		<div class="card-body">
+		<b>Doğrulama Yapılamadı</b>
+		<hr>
+		<code>Language Not Found</code><br>
+		<div class="form-group">
+		<br><br><a href="install.php?git=license" class="btn btn-dark">Yenile / Refresh<br>
+		</a></div></div></div>');
 	} else {
 		setcookie("lang", strip_tags($_POST["lang"]), time()+3600);
 	}
@@ -303,10 +333,6 @@ $headers[] = 'Cookie: __gads=ID=bbdf811cdcc5a441-22401f55f9b8009e:T=1602771440:R
   <input type="password" class="form-control" name="sqlpasswd" placeholder="1234">
 	</div>
 	
-		<div class="form-group">
-  <label for="exampleInputEmail1">SQL Database</label>
-  <input type="text" class="form-control" name="sqldb" placeholder="pxe_boot">
-	</div>
 	<button type="submit" class="btn btn-dark">İleri / Next</button>
 	</form></div></div></body>';
 	break;
@@ -315,11 +341,10 @@ $headers[] = 'Cookie: __gads=ID=bbdf811cdcc5a441-22401f55f9b8009e:T=1602771440:R
 	$mysqlserv = strip_tags($_POST["sqlserver"]);
 	$mysqlusr = strip_tags($_POST["sqlusr"]);
 	$mysqlpass = strip_tags($_POST["sqlpasswd"]);
-	$mysqldb = strip_tags($_POST["sqldb"]);
 	$conn = new mysqli($mysqlserv, $mysqlusr, $mysqlpass);
 	$conn->query("SET CHARACTER SET utf8");
 	$conn->query("SET NAMES utf8");
-	$sql = "CREATE DATABASE ".$mysqldb."";
+	$sql = "CREATE DATABASE pxe_boot";
 	
 	if ($conn->query($sql) === TRUE) {
 		
@@ -337,8 +362,44 @@ $headers[] = 'Cookie: __gads=ID=bbdf811cdcc5a441-22401f55f9b8009e:T=1602771440:R
 	}
 	$conn->close();
 	
-	$sql = mysqli_connect($mysqlserv, $mysqlusr, $mysqlpass, $mysqldbname);
-	$sqlSource = file_get_contents(''.dirname(__FILE__).'/pxe_panel.sql');
+	$sql = mysqli_connect($mysqlserv, $mysqlusr, $mysqlpass, "pxe_boot");
+	$sqlSource = "CREATE TABLE `admin_list` (
+  `admin_id` int(11) NOT NULL,
+  `admin_email` varchar(255) COLLATE utf8_turkish_ci NOT NULL,
+  `admin_usrname` varchar(255) COLLATE utf8_turkish_ci NOT NULL,
+  `admin_passwd` varchar(255) COLLATE utf8_turkish_ci NOT NULL,
+  `admin_token` varchar(255) COLLATE utf8_turkish_ci NOT NULL,
+  `admin_yetki` varchar(255) COLLATE utf8_turkish_ci NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_turkish_ci;
+
+INSERT INTO `admin_list` (`admin_id`, `admin_email`, `admin_usrname`, `admin_passwd`, `admin_token`, `admin_yetki`) VALUES
+(1, 'xxx@xxx.com', 'alicangonullu', '060323f33140b4a86b53d01d726a45c7584a3a2b', '060323f33140b4a86b53d01d726a45c7584a3a2b', '1');
+
+CREATE TABLE `boot_menu` (
+  `boot_id` int(11) NOT NULL,
+  `boot_name` varchar(255) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `boot_labelid` varchar(255) COLLATE utf8_turkish_ci NOT NULL,
+  `boot_isoname` varchar(255) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `boot_speconf` varchar(255) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `boot_othercfg` varchar(255) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `boot_date` date NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_turkish_ci;
+
+INSERT INTO `boot_menu` (`boot_id`, `boot_name`, `boot_labelid`, `boot_isoname`, `boot_speconf`, `boot_othercfg`, `boot_date`) VALUES
+(2, 'FreeDOS', '2', 'fdboot.img', 'append', '', '2020-10-22');
+
+ALTER TABLE `admin_list`
+  ADD PRIMARY KEY (`admin_id`);
+
+ALTER TABLE `boot_menu`
+  ADD PRIMARY KEY (`boot_id`);
+
+ALTER TABLE `admin_list`
+  MODIFY `admin_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+ALTER TABLE `boot_menu`
+  MODIFY `boot_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+COMMIT;";
 	mysqli_multi_query($sql,$sqlSource);
 
 $hostname = shell_exec("hostnamectl | grep -v hostname | grep -v Icon | grep -v Kernel | grep -v Chassis | grep -v Machine | grep -v Boot | grep -v Virtualization | grep -v CPE | grep -v Architecture");
@@ -766,6 +827,10 @@ systemctl stop firewalld<br>
 ?>
 <script>
 document.cookie = "rootpwd= ; expires = Thu, 01 Jan 1970 00:00:00 GMT";
+document.cookie = "netwdrv= ; expires = Thu, 01 Jan 1970 00:00:00 GMT";
+document.cookie = "lang= ; expires = Thu, 01 Jan 1970 00:00:00 GMT";
+document.cookie = "user_id= ; expires = Thu, 01 Jan 1970 00:00:00 GMT";
+document.cookie = "admin_adi= ; expires = Thu, 01 Jan 1970 00:00:00 GMT";
 </script>
 <?php
 break;

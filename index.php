@@ -212,17 +212,20 @@ $query = $db->query("SELECT * FROM admin_list WHERE admin_usrname =".$db->quote(
 if ( $say = $query -> rowCount() ){
 if( $say > 0 ){
 $getir_mail = str_replace("@", "", strip_tags($_POST["mail"]));
-echo '<script>
-document.cookie = "user_id='.strip_tags(md5($getir_mail)).'; expires=Thu, 18 Dec 2013 12:00:00 UTC; path=/";
-document.cookie = "admin_adi='.strip_tags($getir_mail).'; expires=Thu, 18 Dec 2013 12:00:00 UTC; path=/";
-</script>';
+$json2 = json_decode("yukle.json", true);
+session_destroy();
+session_start();
+$_SESSION["user_id"] = md5($getir_mail);
+$_SESSION["admin_adi"] = $getir_mail;
+
+setcookie("user_id", md5($getir_mail), time()+3600);
+setcookie("admin_adi", md5($getir_mail), time()+3600);
+
 $stmt = $db->prepare('SELECT * FROM admin_list WHERE admin_usrname = :admin');
 $stmt->execute(array(':admin' => $name));
 if($rowq = $stmt->fetch()) {
-echo '<script>
-document.cookie = "perm='.strip_tags(md5($rowq["admin_yetki"])).'; expires=Thu, 18 Dec 2013 12:00:00 UTC; path=/";
-document.cookie = "mail_adres='.strip_tags($rowq["admin_email"]).'; expires=Thu, 18 Dec 2013 12:00:00 UTC; path=/";
-</script>';
+$_SESSION["perm"] = md5($rowq["admin_yetki"]);
+$_SESSION["mail_adres"] = strip_tags($rowq["admin_email"]);
 }
 
 
@@ -263,7 +266,7 @@ break;
 
 case 'pxeboot':
 $getir->logincheck($_COOKIE['admin_adi']);
-if($_COOKIE["lang"] == "TR") {
+if($_SESSION["lang"] == "TR") {
 $getir->GetUpdJSON("update.json", "".$verify."/update_get.json");
 } else {
 $getir->GetUpdJSONEng("update.json", "".$verify."/update_get.json");
@@ -306,10 +309,10 @@ $totalconnections = "netstat -na | grep -v LISTEN | grep -v 127.0.0.1 | wc -l";
 $connections1 = shell_exec($connections);
 $totalconnections1 = shell_exec($totalconnections);
 
-if($_COOKIE["lang"] == "TR") {
-$getir->NavBar($_COOKIE["admin_adi"], $_COOKIE["mail_adres"]);
+if($_SESSION["lang"] == "TR") {
+$getir->NavBar($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
 } else {
-$getir->NavBarEng($_COOKIE["admin_adi"], $_COOKIE["mail_adres"]);
+$getir->NavBarEng($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
 }
 echo '<br><br><div class="container page">
     <h1 class="text-center">PXE ISO List</h1>
@@ -525,7 +528,7 @@ echo 'Error:' . curl_error($ch);
 }
 curl_close($ch);
 $obje2 = json_decode($json);
-if($_COOKIE["lang"] == "TR") {
+if($_SESSION["lang"] == "TR") {
 $getir->GetSlider($obje2->silderone, $obje2->sildertwo, $obje2->silderthree, $obje2->silderonelink, $obje2->sildertwolink, $obje2->silderthreelink);
 } else {
 $getir->GetSliderEng($obje2->silderone, $obje2->sildertwo, $obje2->silderthree, $obje2->silderonelink, $obje2->sildertwolink, $obje2->silderthreelink);
@@ -550,7 +553,7 @@ $_DIR = opendir("/var/lib/tftpboot/data/iso");
 while (($_DIRFILE = readdir($_DIR)) !== false){
 if(!is_dir($_DIRFILE)){
 $ext = pathinfo($_DIRFILE, PATHINFO_EXTENSION);
-if($_COOKIE["perm"] == md5("1")) {
+if($_SESSION["perm"] == md5("1")) {
 if($ext == "iso") {
   echo '<tr>
       <td><span class="mif-drive2"></span></td>
@@ -631,11 +634,11 @@ break;
 
 case 'odeliso':
 $getir->logincheck($_COOKIE['admin_adi']);
-$getir->GetSuperPerm($_COOKIE["perm"]);
-if($_COOKIE["lang"] == "TR") {
-$getir->NavBar($_COOKIE["admin_adi"], $_COOKIE["mail_adres"]);
+$getir->GetSuperPerm($_SESSION["perm"]);
+if($_SESSION["lang"] == "TR") {
+$getir->NavBar($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
 } else {
-$getir->NavBarEng($_COOKIE["admin_adi"], $_COOKIE["mail_adres"]);
+$getir->NavBarEng($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
 }
 echo '
 <div class="container mt-5">
@@ -655,10 +658,10 @@ break;
 
 case 'deliso':
 $getir->logincheck($_COOKIE['admin_adi']);
-if($_COOKIE["lang"] == "TR") {
-$getir->NavBar($_COOKIE["admin_adi"], $_COOKIE["mail_adres"]);
+if($_SESSION["lang"] == "TR") {
+$getir->NavBar($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
 } else {
-$getir->NavBarEng($_COOKIE["admin_adi"], $_COOKIE["mail_adres"]);
+$getir->NavBarEng($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
 }
 echo '</body>';
 $file_pointer = "/var/lib/tftpboot/data/iso/".strip_tags($_GET["name"])."";
@@ -696,7 +699,7 @@ echo ('
 break;
 
 case 'logs':
-$getir->GetSuperPerm($_COOKIE["perm"]);
+$getir->GetSuperPerm($_SESSION["perm"]);
 $getir->logincheck($_COOKIE['admin_adi']);
 $dnsmasq_stat = "systemctl status dnsmasq";
 $lsla_stat = "ls -la /var/lib/tftpboot/data/iso";
@@ -705,10 +708,10 @@ $default = "cat /var/lib/tftpboot/pxelinux.cfg/default";
 $phpabout = "php -v | grep -v Zend | grep -v Copyright";
 $linuxinfo = "uname -a | grep -v grep";
 $hostname = "hostnamectl";
-if($_COOKIE["lang"] == "TR") {
-$getir->NavBar($_COOKIE["admin_adi"], $_COOKIE["mail_adres"]);
+if($_SESSION["lang"] == "TR") {
+$getir->NavBar($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
 } else {
-$getir->NavBarEng($_COOKIE["admin_adi"], $_COOKIE["mail_adres"]);
+$getir->NavBarEng($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
 }
 
 ?>
@@ -802,11 +805,11 @@ break;
 
 case 'edit':
 $getir->logincheck($_COOKIE['admin_adi']);
-$getir->GetSuperPerm($_COOKIE["perm"]);
-if($_COOKIE["lang"] == "TR") {
-$getir->NavBar($_COOKIE["admin_adi"], $_COOKIE["mail_adres"]);
+$getir->GetSuperPerm($_SESSION["perm"]);
+if($_SESSION["lang"] == "TR") {
+$getir->NavBar($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
 } else {
-$getir->NavBarEng($_COOKIE["admin_adi"], $_COOKIE["mail_adres"]);
+$getir->NavBarEng($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
 }
 echo '
 <div class="container card mt-5">
@@ -865,7 +868,7 @@ break;
 
 case 'pedit':
 $getir->logincheck($_COOKIE['admin_adi']);
-$getir->GetSuperPerm($_COOKIE["perm"]);
+$getir->GetSuperPerm($_SESSION["perm"]);
 if (file_exists("backup/dnsmasq.conf")) {
 	unlink("backup/dnsmasq.conf");
 	touch("backup/dnsmasq.conf");
@@ -891,7 +894,7 @@ tftp-root=/var/lib/tftpboot';
 $file3 = fopen("backup/dnsmasq.conf", "a");
 fwrite($file3, $select);
 fclose($file3);
-$getir->NavBar($_COOKIE["admin_adi"], $_COOKIE["mail_adres"]);
+$getir->NavBar($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
 $shell2 = shell_exec("rm -rf /etc/dnsmasq.conf");
 $shell3 = shell_exec("cp backup/dnsmasq.conf /etc/");
 echo '
@@ -918,10 +921,10 @@ break;
 
 case 'genpxe':
 $getir->logincheck($_COOKIE['admin_adi']);
-if($_COOKIE["lang"] == "TR") {
-$getir->NavBar($_COOKIE["admin_adi"], $_COOKIE["mail_adres"]);
+if($_SESSION["lang"] == "TR") {
+$getir->NavBar($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
 } else {
-$getir->NavBarEng($_COOKIE["admin_adi"], $_COOKIE["mail_adres"]);
+$getir->NavBarEng($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
 }
 echo '
 
@@ -1011,7 +1014,7 @@ shell_exec($semanage_cfg);
 shell_exec($restorecon_cfg);
 
 echo '';
-$getir->NavBar($_COOKIE["admin_adi"], $_COOKIE["mail_adres"]); 
+$getir->NavBar($_SESSION["admin_adi"], $_SESSION["mail_adres"]); 
 if(intval($_POST["labelid"]) <= 1) {
 die("<p>PXE Data Unsuccesfully</p>
 <p>Label ID birden küçük olmamalı</p> 
@@ -1187,12 +1190,12 @@ echo '
 break;
 
 case 'addiso':
-$getir->GetSuperPerm($_COOKIE["perm"]);
+$getir->GetSuperPerm($_SESSION["perm"]);
 $getir->logincheck($_COOKIE['admin_adi']);
-if($_COOKIE["lang"] == "TR") {
-$getir->NavBar($_COOKIE["admin_adi"], $_COOKIE["mail_adres"]);
+if($_SESSION["lang"] == "TR") {
+$getir->NavBar($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
 } else {
-$getir->NavBarEng($_COOKIE["admin_adi"], $_COOKIE["mail_adres"]);
+$getir->NavBarEng($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
 }
 
 $ch = curl_init();
@@ -1314,14 +1317,14 @@ function abortHandler(event) {
 break;
 
 case 'autoinstaller':
-$getir->GetSuperPerm($_COOKIE["perm"]);
+$getir->GetSuperPerm($_SESSION["perm"]);
 $getir->logincheck($_COOKIE['admin_adi']);
 ini_set('post_max_size', '10240M'); 
 ini_set('upload_max_filesize', '10240M');
-if($_COOKIE["lang"] == "TR") {
-$getir->NavBar($_COOKIE["admin_adi"], $_COOKIE["mail_adres"]);
+if($_SESSION["lang"] == "TR") {
+$getir->NavBar($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
 } else {
-$getir->NavBarEng($_COOKIE["admin_adi"], $_COOKIE["mail_adres"]);
+$getir->NavBarEng($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
 }
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_URL, "".$otoinstaller_repo."/get_oslist.php?isoname=".strip_tags($_POST["server"])."");
@@ -1383,14 +1386,14 @@ URL : '.($obje4["0"]["iso_url"]).'<br>
 break;
 
 case 'upliso':
-$getir->GetSuperPerm($_COOKIE["perm"]);
+$getir->GetSuperPerm($_SESSION["perm"]);
 $getir->logincheck($_COOKIE['admin_adi']);
 ini_set('post_max_size', '10240M'); 
 ini_set('upload_max_filesize', '10240M');
-if($_COOKIE["lang"] == "TR") {
-$getir->NavBar($_COOKIE["admin_adi"], $_COOKIE["mail_adres"]);
+if($_SESSION["lang"] == "TR") {
+$getir->NavBar($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
 } else {
-$getir->NavBarEng($_COOKIE["admin_adi"], $_COOKIE["mail_adres"]);
+$getir->NavBarEng($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
 }
 $dizin2 = '/var/lib/tftpboot/data/iso/';
 echo '</body>';
@@ -1489,22 +1492,22 @@ break;
 
 case 'speedtest':
 $getir->logincheck($_COOKIE['admin_adi']);
-if($_COOKIE["lang"] == "TR") {
-$getir->NavBar($_COOKIE["admin_adi"], $_COOKIE["mail_adres"]);
+if($_SESSION["lang"] == "TR") {
+$getir->NavBar($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
 } else {
-$getir->NavBarEng($_COOKIE["admin_adi"], $_COOKIE["mail_adres"]);
+$getir->NavBarEng($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
 }
 $getir->GetMicro();
 break;
 
 
 case 'paddiso':
-$getir->GetSuperPerm($_COOKIE["perm"]);
+$getir->GetSuperPerm($_SESSION["perm"]);
 $getir->logincheck($_COOKIE['admin_adi']);
-if($_COOKIE["lang"] == "TR") {
-$getir->NavBar($_COOKIE["admin_adi"], $_COOKIE["mail_adres"]);
+if($_SESSION["lang"] == "TR") {
+$getir->NavBar($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
 } else {
-$getir->NavBarEng($_COOKIE["admin_adi"], $_COOKIE["mail_adres"]);
+$getir->NavBarEng($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
 }
 $yuklenecek_dosya = "wget -P /var/lib/tftpboot/data/iso ".escapeshellarg($_POST["wgetiso"])."";
 $stop_firewall = "systemctl stop firewalld";
@@ -1539,12 +1542,12 @@ break;
 
 case 'admin':
 $getir->logincheck($_COOKIE['admin_adi']);
-if($_COOKIE["lang"] == "TR") {
-$getir->NavBar($_COOKIE["admin_adi"], $_COOKIE["mail_adres"]);
+if($_SESSION["lang"] == "TR") {
+$getir->NavBar($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
 } else {
-$getir->NavBarEng($_COOKIE["admin_adi"], $_COOKIE["mail_adres"]);
+$getir->NavBarEng($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
 } 
-if($_COOKIE["perm"] == md5("1")) {
+if($_SESSION["perm"] == md5("1")) {
 echo '
 <br><br><div class="container card mt-5">
 <div class="window-caption">
@@ -1601,12 +1604,12 @@ echo '
 break;
 
 case 'deladmin':
-$getir->GetSuperPerm($_COOKIE["perm"]);
+$getir->GetSuperPerm($_SESSION["perm"]);
 $getir->logincheck($_COOKIE['admin_adi']);
-if($_COOKIE["lang"] == "TR") {
-$getir->NavBar($_COOKIE["admin_adi"], $_COOKIE["mail_adres"]);
+if($_SESSION["lang"] == "TR") {
+$getir->NavBar($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
 } else {
-$getir->NavBarEng($_COOKIE["admin_adi"], $_COOKIE["mail_adres"]);
+$getir->NavBarEng($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
 } 
 $stmt = $db->prepare('DELETE FROM admin_list WHERE admin_id = :postID');
 $stmt->execute(array(':postID' => strip_tags($_GET["id"])));
@@ -1626,12 +1629,12 @@ echo ('
 break;
 
 case 'addadmin':
-$getir->GetSuperPerm($_COOKIE["perm"]);
+$getir->GetSuperPerm($_SESSION["perm"]);
 $getir->logincheck($_COOKIE['admin_adi']);
-if($_COOKIE["lang"] == "TR") {
-$getir->NavBar($_COOKIE["admin_adi"], $_COOKIE["mail_adres"]);
+if($_SESSION["lang"] == "TR") {
+$getir->NavBar($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
 } else {
-$getir->NavBarEng($_COOKIE["admin_adi"], $_COOKIE["mail_adres"]);
+$getir->NavBarEng($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
 } 
 echo '
 
@@ -1688,12 +1691,12 @@ echo '
 break;
 
 case 'paddadmin':
-$getir->GetSuperPerm($_COOKIE["perm"]);
+$getir->GetSuperPerm($_SESSION["perm"]);
 $getir->logincheck($_COOKIE['admin_adi']);
-if($_COOKIE["lang"] == "TR") {
-$getir->NavBar($_COOKIE["admin_adi"], $_COOKIE["mail_adres"]);
+if($_SESSION["lang"] == "TR") {
+$getir->NavBar($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
 } else {
-$getir->NavBarEng($_COOKIE["admin_adi"], $_COOKIE["mail_adres"]);
+$getir->NavBarEng($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
 } 
 $update = $db->prepare("INSERT INTO admin_list(admin_email, admin_usrname, admin_passwd, admin_token, admin_yetki) VALUES (:email, :usrname, :passwd, :token, :perm) ");
 $update->bindValue(':email', strip_tags($_POST["email"]));
@@ -1720,14 +1723,14 @@ break;
 case 'resetpass':
 $getir->logincheck($_COOKIE['admin_adi']);
 
-if($_COOKIE["lang"] == "TR") {
-$getir->NavBar($_COOKIE["admin_adi"], $_COOKIE["mail_adres"]);
+if($_SESSION["lang"] == "TR") {
+$getir->NavBar($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
 } else {
-$getir->NavBarEng($_COOKIE["admin_adi"], $_COOKIE["mail_adres"]);
+$getir->NavBarEng($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
 } 
 
 $stmt = $db->prepare('SELECT * FROM admin_list WHERE admin_usrname = :admin');
-$stmt->execute(array(':admin' => $_COOKIE["admin_adi"]));
+$stmt->execute(array(':admin' => $_SESSION["admin_adi"]));
 if($row = $stmt->fetch()) {
 echo '<div class="container card card mt-5">
 <div class="window-caption">
@@ -1749,13 +1752,13 @@ break;
 
 case 'resettoken':
 $getir->logincheck($_COOKIE['admin_adi']);
-if($_COOKIE["lang"] == "TR") {
-$getir->NavBar($_COOKIE["admin_adi"], $_COOKIE["mail_adres"]);
+if($_SESSION["lang"] == "TR") {
+$getir->NavBar($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
 } else {
-$getir->NavBarEng($_COOKIE["admin_adi"], $_COOKIE["mail_adres"]);
+$getir->NavBarEng($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
 } 
 $stmt = $db->prepare('SELECT * FROM admin_list WHERE admin_usrname = :admin');
-$stmt->execute(array(':admin' => $_COOKIE["admin_adi"]));
+$stmt->execute(array(':admin' => $_SESSION["admin_adi"]));
 if($row = $stmt->fetch()) {
 echo '
 <br>
@@ -1780,15 +1783,15 @@ break;
 
 case 'presettoken':
 $getir->logincheck($_COOKIE['admin_adi']);
-if($_COOKIE["lang"] == "TR") {
-$getir->NavBar($_COOKIE["admin_adi"], $_COOKIE["mail_adres"]);
+if($_SESSION["lang"] == "TR") {
+$getir->NavBar($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
 } else {
-$getir->NavBarEng($_COOKIE["admin_adi"], $_COOKIE["mail_adres"]);
+$getir->NavBarEng($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
 } 
 
 $update = $db->prepare("UPDATE admin_list SET admin_token = :token WHERE admin_usrname = :adi");
 $update->bindValue(':token',  sha1(md5($_POST["tokenw"])));
-$update->bindValue(':adi', strip_tags($_COOKIE["admin_adi"]));
+$update->bindValue(':adi', strip_tags($_SESSION["admin_adi"]));
 $update->execute();
 if($row = $update->rowCount()) {
 echo '
@@ -1820,15 +1823,15 @@ break;
 
 case 'presetpass':
 $getir->logincheck($_COOKIE['admin_adi']);
-if($_COOKIE["lang"] == "TR") {
-$getir->NavBar($_COOKIE["admin_adi"], $_COOKIE["mail_adres"]);
+if($_SESSION["lang"] == "TR") {
+$getir->NavBar($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
 } else {
-$getir->NavBarEng($_COOKIE["admin_adi"], $_COOKIE["mail_adres"]);
+$getir->NavBarEng($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
 } 
 
 $update = $db->prepare("UPDATE admin_list SET admin_passwd = :sifre WHERE admin_usrname = :adi");
 $update->bindValue(':sifre',  sha1(md5($_POST["passw"])));
-$update->bindValue(':adi', strip_tags($_COOKIE["admin_adi"]));
+$update->bindValue(':adi', strip_tags($_SESSION["admin_adi"]));
 $update->execute();
 if($row = $update->rowCount()) {
 echo '
@@ -1847,12 +1850,12 @@ echo '
 break;
 
 case 'langupd':
-$getir->GetSuperPerm($_COOKIE["perm"]);
+$getir->GetSuperPerm($_SESSION["perm"]);
 $getir->logincheck($_COOKIE['admin_adi']);
-if($_COOKIE["lang"] == "TR") {
-$getir->NavBar($_COOKIE["admin_adi"], $_COOKIE["mail_adres"]);
+if($_SESSION["lang"] == "TR") {
+$getir->NavBar($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
 } else {
-$getir->NavBarEng($_COOKIE["admin_adi"], $_COOKIE["mail_adres"]);
+$getir->NavBarEng($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
 } 
 $file = json_decode("update.json" ,true);
 
@@ -1881,12 +1884,12 @@ echo '</select><br><br>
 break;
 
 case 'plangupd':
-$getir->GetSuperPerm($_COOKIE["perm"]);
+$getir->GetSuperPerm($_SESSION["perm"]);
 $getir->logincheck($_COOKIE['admin_adi']);
-if($_COOKIE["lang"] == "TR") {
-$getir->NavBar($_COOKIE["admin_adi"], $_COOKIE["mail_adres"]);
+if($_SESSION["lang"] == "TR") {
+$getir->NavBar($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
 } else {
-$getir->NavBarEng($_COOKIE["admin_adi"], $_COOKIE["mail_adres"]);
+$getir->NavBarEng($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
 } 
 
 $file = "update.json";
@@ -1914,16 +1917,16 @@ document.cookie = "lang= ; expires = Thu, 01 Jan 1970 00:00:00 GMT";
 </div>
 <br>
 <a class="button primary" href="index.php?git=langupd">Go Home</a></body>';
-session_destroy($_COOKIE["lang"]);
+session_destroy($_SESSION["lang"]);
 
 break;
 
 case 'mesaj':
 $getir->logincheck($_COOKIE['admin_adi']);
-if($_COOKIE["lang"] == "TR") {
-$getir->NavBar($_COOKIE["admin_adi"], $_COOKIE["mail_adres"]);
+if($_SESSION["lang"] == "TR") {
+$getir->NavBar($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
 } else {
-$getir->NavBarEng($_COOKIE["admin_adi"], $_COOKIE["mail_adres"]);
+$getir->NavBarEng($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
 } 
 $ds = shell_exec('udevadm info --query=all --name=/dev/sda | grep ID_SERIAL_SHORT');
 $serialx = explode("=", $ds);
@@ -2005,7 +2008,7 @@ $('#output').html('<b>' + yazar + '</b> : ' + icerik + '<br>');
 }); 
 </script>
 <?php
-if($_COOKIE["perm"] == md5("1")) {
+if($_SESSION["perm"] == md5("1")) {
 echo '
 <div class="container card mt-5 mt-5">
 <div class="window-caption">
@@ -2058,20 +2061,20 @@ break;
 
 case 'mesajgor':
 $getir->logincheck($_COOKIE['admin_adi']);
-if($_COOKIE["lang"] == "TR") {
-$getir->NavBar($_COOKIE["admin_adi"], $_COOKIE["mail_adres"]);
+if($_SESSION["lang"] == "TR") {
+$getir->NavBar($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
 } else {
-$getir->NavBarEng($_COOKIE["admin_adi"], $_COOKIE["mail_adres"]);
+$getir->NavBarEng($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
 } 
 $getir->GetMessages($verify);
 break;
 
 case 'promotegor':
 $getir->logincheck($_COOKIE['admin_adi']);
-if($_COOKIE["lang"] == "TR") {
-$getir->NavBar($_COOKIE["admin_adi"], $_COOKIE["mail_adres"]);
+if($_SESSION["lang"] == "TR") {
+$getir->NavBar($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
 } else {
-$getir->NavBarEng($_COOKIE["admin_adi"], $_COOKIE["mail_adres"]);
+$getir->NavBarEng($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
 } 
 $getir->GetPromoteMessages($verify);
 break;
@@ -2079,10 +2082,10 @@ break;
 
 case 'community':
 $getir->logincheck($_COOKIE['admin_adi']);
-if($_COOKIE["lang"] == "TR") {
-$getir->NavBar($_COOKIE["admin_adi"], $_COOKIE["mail_adres"]);
+if($_SESSION["lang"] == "TR") {
+$getir->NavBar($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
 } else {
-$getir->NavBarEng($_COOKIE["admin_adi"], $_COOKIE["mail_adres"]);
+$getir->NavBarEng($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
 } 
 
 $ds = shell_exec('udevadm info --query=all --name=/dev/sda | grep ID_SERIAL_SHORT');
@@ -2174,6 +2177,7 @@ document.cookie = "lang= ; expires = Thu, 01 Jan 1970 00:00:00 GMT";
 document.cookie = "user_id= ; expires = Thu, 01 Jan 1970 00:00:00 GMT";
 document.cookie = "admin_adi= ; expires = Thu, 01 Jan 1970 00:00:00 GMT";
 document.cookie = "mail_adres= ; expires = Thu, 01 Jan 1970 00:00:00 GMT";
+document.cookie = "lang= ; expires = Thu, 01 Jan 1970 00:00:00 GMT";
 window.location.replace("index.php");
 </script>
 <?php

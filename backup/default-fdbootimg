@@ -1,5 +1,0 @@
-
-LABEL 2
-MENU LABEL FreeDOS
-KERNEL memdisk
-append initrd data/iso/fdboot.img

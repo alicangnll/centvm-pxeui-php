@@ -1,5 +1,6 @@
 # CentVM PXE / NetBoot Web Server UI | PHP 7.2+
 <center><b>CentVM PXE / NetBoot Web Server UI | PHP 7.2+</b></center><br>
+<center><b>Supporting CentOS 7+</b></center><br>
 <br>
 
 <center>

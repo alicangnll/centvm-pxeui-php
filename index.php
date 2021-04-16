@@ -2033,6 +2033,7 @@ echo '</tbody>
 </div>
 <b>UUID : '.md5($serial).'</b><br><br>
 <a class="button primary" href="index.php?git=community">Chat with Community</a><br><br>
+<a class="button primary" href="index.php?git=mesajgonder">Send Message to Creator</a><br><br>
 </body>';
 } else {
 echo '<div class="container card mt-5 mt-5">
@@ -2045,6 +2046,42 @@ echo '<div class="container card mt-5 mt-5">
 <a class="button primary" href="index.php?git=community">Chat with Community</a><br><br>
 </div></body>';
 }
+break;
+
+case 'mesajgonder':
+$getir->logincheck($_COOKIE['admin_adi']);
+if($_SESSION["lang"] == "TR") {
+$getir->NavBar($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
+} else {
+$getir->NavBarEng($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
+} 
+$url = "".$verify."/mesajgonder.php";
+$ds = shell_exec('udevadm info --query=all --name=/dev/sda | grep ID_SERIAL_SHORT');
+$serialx = explode("=", $ds);
+$serial = $serialx[1];
+echo '<div class="container card mt-5 mt-5">
+<div class="window-caption">
+<span class="title">Sent Message / Mesaj Gönder</span>
+<div class="buttons">
+</div></div>
+<div class="window-content p-2">
+<form action="'.$url.'" method="post" class="container">
+
+<div class="form-group">
+<p>Name</p>
+<input type="text" data-role="input" class="mt-4" name="baslik" id="baslik"></div>
+
+<div class="form-group">
+<p>E-Mail</p>
+<input type="email" data-role="input" class="mt-4" name="mail" id="mail"></div>
+
+<div class="form-group">
+<p>Comment</p>
+<textarea data-role="textarea" class="mt-4" name="konu" id="konu"></textarea></div>
+<input type="hidden" name="uuid" id="uuid" value="'.md5($serial).'">
+
+<input class="button primary mt-5" type="submit" value="Submit">
+</form></div></div>';
 break;
 
 case 'mesajgor':

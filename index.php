@@ -307,8 +307,8 @@ echo '<div class="container mt-5">
 <table class="table" data-role="table">
 <thead>
 <tr>
-    <th data-sortable="true" data-sort-dir="asc">ID</th>
-    <th data-sortable="true" data-format="text">Işletim Sistemi</th>
+    <th data-sortable="true" data-sort-dir="asc"></th>
+    <th data-sortable="true" data-format="text">Dosya Adı</th>
     <th data-sortable="true"></th>
 	<th data-sortable="true"></th>
 </tr>
@@ -319,75 +319,18 @@ while (($_DIRFILE = readdir($_DIR)) !== false){
 if(!is_dir($_DIRFILE)){
 $ext = pathinfo($_DIRFILE, PATHINFO_EXTENSION);
 if($_SESSION["perm"] == md5("1")) {
-if($ext == "iso") {
-  echo '<tr>
-      <td><span class="mif-drive2"></span></td>
-      <td>'.strip_tags($_DIRFILE).'</td>
-      <td><a href="index.php?git=odeliso&name='.strip_tags($_DIRFILE).'">Sil</a></td>
-	  <td><a href="index.php?git=genpxe&name='.strip_tags($_DIRFILE).'">Generate Config</a></td>
-  </tr>';
-} elseif($ext == "img") {
-  echo '<tr>
-      <td><span class="mif-drive"></span></td>
-      <td>'.strip_tags($_DIRFILE).'</td>
-      <td><a href="index.php?git=odeliso&name='.strip_tags($_DIRFILE).'">Sil</a></td>
-	  <td><a href="index.php?git=genpxe&name='.strip_tags($_DIRFILE).'">Generate Config</a></td>
-  </tr>';
-} elseif($ext == "vhd") {
-  echo '<tr>
-      <td><span class="mif-drive"></span></td>
-      <td>'.strip_tags($_DIRFILE).'</td>
-      <td><a href="index.php?git=odeliso&name='.strip_tags($_DIRFILE).'">Sil</a></td>
-	  <td><a href="index.php?git=genpxe&name='.strip_tags($_DIRFILE).'">Generate Config</a></td>
-  </tr>';
-} elseif($ext == "vhdx") {
-  echo '<tr>
-      <td><span class="mif-drive"></span></td>
-      <td>'.strip_tags($_DIRFILE).'</td>
-      <td><a href="index.php?git=odeliso&name='.strip_tags($_DIRFILE).'">Sil</a></td>
-	  <td><a href="index.php?git=genpxe&name='.strip_tags($_DIRFILE).'">Generate Config</a></td>
-  </tr>';
-} else {
-	  echo '<tr>
+echo '<tr>
       <td><span class="mif-files-empty"></span></td>
       <td>'.strip_tags($_DIRFILE).'</td>
       <td><a href="index.php?git=odeliso&name='.strip_tags($_DIRFILE).'">Sil</a></td>
 	  <td><a href="index.php?git=genpxe&name='.strip_tags($_DIRFILE).'">Generate Config</a></td>
   </tr>';
-}
-
 } else {
-if($ext == "iso") {
   echo '<tr>
       <td><span class="mif-drive2"></span></td>
       <td>'.strip_tags($_DIRFILE).'</td>
 	  <td><a href="index.php?git=genpxe&name='.strip_tags($_DIRFILE).'">Generate Config</a></td>
   </tr>';
-} elseif($ext == "img") {
-  echo '<tr>
-      <td><span class="mif-drive"></span></td>
-      <td>'.strip_tags($_DIRFILE).'</td>
-	  <td><a href="index.php?git=genpxe&name='.strip_tags($_DIRFILE).'">Generate Config</a></td>
-  </tr>';
-} elseif($ext == "vhd") {
-  echo '<tr>
-      <td><span class="mif-drive"></span></td>
-      <td>'.strip_tags($_DIRFILE).'</td>
-	  <td><a href="index.php?git=genpxe&name='.strip_tags($_DIRFILE).'">Generate Config</a></td>
-  </tr>';
-} elseif($ext == "vhdx") {
-  echo '<tr>
-      <td><span class="mif-drive"></span></td>
-      <td>'.strip_tags($_DIRFILE).'</td>
-	  <td><a href="index.php?git=genpxe&name='.strip_tags($_DIRFILE).'">Generate Config</a></td>
-  </tr>';
-} else {
-	  echo '<tr>
-      <td><span class="mif-files-empty"></span></td>
-      <td>'.strip_tags($_DIRFILE).'</td>
-	  <td><a href="index.php?git=genpxe&name='.strip_tags($_DIRFILE).'">Generate Config</a></td>
-  </tr>';
-}
 }
 
 
@@ -606,8 +549,6 @@ echo '
 <div class="window-content p-2">
 <p>Lütfen ISO PXE Config bilgilerini giriniz.</p>
 <br>
-<b>ISO Name : '.strip_tags($_GET["name"]).'</b>
-<br>
 <form action="index.php?git=pgenpxe" method="post">
 
 <div class="form-group">
@@ -615,28 +556,31 @@ echo '
 <input type="text" data-role="input" data-prepend="Label ID: " class="form-control" name="labelid" placeholder="Label ID">
 </div>
 
-
 <input type="hidden" class="form-control" name="labelisoname" value="'.strip_tags($_GET["name"]).'">
-<div class="form-group">
-<label for="exampleInputEmail1">ISO Location</label>
-<input type="text" data-role="input" data-prepend="ISO Location: " class="form-control" name="labelisoname" placeholder="data/iso/'.strip_tags($_GET["name"]).' | http://'.strip_tags($_SERVER['SERVER_NAME']).'/backup/'.strip_tags($_GET["name"]).'">
-</div>
+<input type="hidden" name="labelisoname" value="'.strip_tags($_GET["name"]).'"><br>
 
+<div class="form-group">
+<label for="exampleInputEmail1">File Type</label>
+<select name="type" data-role="select" class="form-control" id="type">
+<option value="vhd">VHD</option>
+<option value="iso">ISO</option>
+</select>
+</div><br>
 
 <div class="form-group">
 <label for="exampleInputEmail1">Label Name</label>
 <input type="text" data-role="input" data-prepend="Label Name: " class="form-control" name="labelname" placeholder="Win/Linux/macOS">
-</div>
+</div><br>
 
 <div class="form-group">
 <label for="exampleInputEmail1">Special Config</label>
-<input type="text" data-role="input" data-prepend="Special Config: " class="form-control" name="speconf" placeholder="append iso raw">
-</div>
+<textarea data-role="textarea" class="form-control" name="speconf" placeholder="append iso raw"></textarea>
+</div><br>
 
 <div class="form-group">
 <label for="exampleInputEmail1">Other Config</label>
-<input type="text" data-role="input" data-prepend="Other Config: " class="form-control" name="othercfg" placeholder="Other Config">
-</div>
+<textarea data-role="textarea" class="form-control" name="othercfg" placeholder="Other Config"></textarea>
+</div><br>
 
 <div class="form-group">
 <label for="exampleInputEmail1">Delete Old PXE Menu</label>
@@ -644,7 +588,7 @@ echo '
 <option value="1">YES</option>
 <option value="0">NO</option>
 </select>
-</div>
+</div><br>
 <br><br><br>
 <button class="button secondary">Create</button>
 </form></div>
@@ -665,14 +609,21 @@ if (!file_exists($file)) {
 }
 
 $getir->OtherCommands();
-
 $getir->NavBarCont(); 
 if(intval($_POST["labelid"]) <= 1) {
 $getir->Error("Label ID birden küçük olmamalı");
 } else {
 }
 
-
+if($_POST['type'] == "vhd") {
+$create = "mkdir /var/lib/tftpboot/data/iso/".strip_tags($_FILES['dosya']['name'])."";
+$vhdext = "guestmount --add /var/lib/tftpboot/data/iso/".strip_tags($_POST["labelisoname"]).".vhd --inspector --ro /var/lib/tftpboot/data/iso/".strip_tags($_POST["labelisoname"])."";
+$data = 'data/iso/'.strip_tags($_POST["labelisoname"]).'';
+} elseif($_POST['type'] == "iso") {
+$data = 'data/iso/'.strip_tags($_POST["labelisoname"]).'';
+} else {
+$data = 'data/iso/notfound.img';
+}
 
 if(intval($_POST["delete"]) == "1") {
 $txt = 'default menu.c32
@@ -690,14 +641,11 @@ LOCALBOOT 0
 LABEL '.intval($_POST["labelid"]).'
 MENU LABEL '.strip_tags($_POST["labelname"]).'
 kernel memdisk
-initrd '.strip_tags($_POST["labelisoname"]).'
+initrd '.strip_tags($data).'
 '.strip_tags($_POST["speconf"]).' 
 '.strip_tags($_POST["othercfg"]).'';
-$shell = shell_exec("rm -rf /var/lib/tftpboot/pxelinux.cfg/default");
-$fp = fopen("/var/lib/tftpboot/pxelinux.cfg/default","a");
-fwrite($fp,$txt);
-fclose($fp);
 
+$shell = shell_exec("rm -rf /var/lib/tftpboot/pxelinux.cfg/default");
 $update = $db->prepare("INSERT INTO boot_menu(boot_name, boot_isoname, boot_speconf, boot_othercfg, boot_date, boot_labelid) VALUES (:bootname, :isoname, :speconf, :othercfg, :tarih, :labelid) ");
 $update->bindValue(':bootname', strip_tags($_POST["labelname"]));
 $update->bindValue(':isoname', strip_tags($_POST["labelisoname"]));
@@ -716,19 +664,17 @@ echo '
 </code>
 </div></body>';
 }
-
+$fp = fopen("/var/lib/tftpboot/pxelinux.cfg/default","a");
+fwrite($fp,$txt);
+fclose($fp);
 } else {
 $txt = '
 LABEL '.intval($_POST["labelid"]).'
 MENU LABEL '.strip_tags($_POST["labelname"]).'
 kernel memdisk
-initrd '.strip_tags($_POST["labelisoname"]).'
+initrd '.strip_tags($data).'
 '.strip_tags($_POST["speconf"]).' 
 '.strip_tags($_POST["othercfg"]).'';
-
-$fp = fopen("/var/lib/tftpboot/pxelinux.cfg/default","a");
-fwrite($fp,$txt);
-fclose($fp);
 
 $update = $db->prepare("INSERT INTO boot_menu(boot_name, boot_isoname, boot_speconf, boot_othercfg, boot_date) VALUES (:bootname, :isoname, :speconf, :othercfg, :tarih) ");
 $update->bindValue(':bootname', strip_tags($_POST["labelname"]));
@@ -746,7 +692,9 @@ echo '
 </code>
 </div></body>';
 }
-
+$fp = fopen("/var/lib/tftpboot/pxelinux.cfg/default","a");
+fwrite($fp,$txt);
+fclose($fp);
 }
 
 }
@@ -957,23 +905,7 @@ if($ext == "iso") {
 } elseif($ext == "dmg") {
 } elseif($ext == "bin") {
 } elseif($ext == "vhdx") {
-
-if(file_exists($_FILES['dosya']['name'])) {
-$vhdext = "guestmount --add ".strip_tags($_FILES['dosya']['name']).".vhdx --inspector --ro ".dirname(__FILE__)."/backup/".strip_tags($_FILES['dosya']['name'])."";
-} else {
-$create = "mkdir ".dirname(__FILE__)."/backup/".strip_tags($_FILES['dosya']['name'])."";
-$vhdext = "guestmount --add ".strip_tags($_FILES['dosya']['name']).".vhdx --inspector --ro ".dirname(__FILE__)."/backup/".strip_tags($_FILES['dosya']['name'])."";
-}
-
 } elseif($ext == "vhd") {
-
-if(file_exists($_FILES['dosya']['name'])) {
-$vhdext = "guestmount --add ".strip_tags($_FILES['dosya']['name']).".vhd --inspector --ro ".dirname(__FILE__)."/backup/".strip_tags($_FILES['dosya']['name'])."";
-} else {
-$create = "mkdir ".dirname(__FILE__)."/backup/".strip_tags($_FILES['dosya']['name'])."";
-$vhdext = "guestmount --add ".strip_tags($_FILES['dosya']['name']).".vhd --inspector --ro ".dirname(__FILE__)."/backup/".strip_tags($_FILES['dosya']['name'])."";
-}
-
 } else {
 $getir->Error('Uzantı desteklenmiyor');
 }

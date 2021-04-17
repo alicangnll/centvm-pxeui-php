@@ -818,19 +818,14 @@ unlink("backup/centvm.service");
 }
 $select2 = '
 [Unit]
-Description=CentVM - PHP-based PXE Panel
-After=network.target
+Description = CentVM - PHP-based PXE Panel
+After = network.target
 
 [Service]
-Type=simple
-User=root
-ExecStart=sh '.dirname(__FILE__).'/backup/custom_start.sh
-Restart=on-abort
-
+ExecStart = '.dirname(__FILE__).'/backup/custom_start.sh
 
 [Install]
-WantedBy=multi-user.target
-';
+WantedBy = multi-user.target';
 $file4 = fopen("backup/centvm.service", "a");
 fwrite($file4, $select2);
 fclose($file4);
@@ -1035,8 +1030,17 @@ $.getJSON('netw.php?id=2', function(emp) {
 document.getElementById("uptime").innerHTML = emp.data;
 }); 
 }
+//Filename
+function filename(){
+$.getJSON('netw.php?id=6', function(emp) { 
+document.getElementById("filename").innerHTML = emp[0].file;
+}); 
+}
 
 $(document).ready(function() {
+$.getJSON('netw.php?id=6', function(emp) { 
+$('#filename').html('' + emp[0].file + ''); 
+}); 
 $.getJSON('netw.php?id=5', function(emp) { 
 $('#hddusage').html('' + emp.data + '%'); 
 }); 	
@@ -1057,6 +1061,7 @@ setInterval(function(){
 hddusage();
 cpu();
 freeram();
+filename();
 }, 2000);
 });
 jQuery(document).ready(function($){

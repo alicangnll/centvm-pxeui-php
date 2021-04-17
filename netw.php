@@ -66,6 +66,10 @@ $available = (disk_free_space("/")/1024);
 $used = ($total - $available);
 $hdd_usage = intval($used/$total*100);
 echo '{"name":"hdd","data": "'.trim($hdd_usage).'"}';
+} elseif(strip_tags($durum) == "6") {
+$dir = "/var/lib/tftpboot/data/iso";
+$scanned_directory = array_diff(scandir($dir), array('..', '.'));
+echo '{"name":"filename","data": ""}';
 } else {
 }
 ?>

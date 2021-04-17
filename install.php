@@ -799,18 +799,14 @@ fclose($file3);
 
 $select2 = '
 [Unit]
-Description=CentVM - PHP-based PXE Panel
-After=network.target
+Description = CentVM - PHP-based PXE Panel
+After = network.target
 
 [Service]
-Type=simple
-User=root
-ExecStart=sh '.dirname(__FILE__).'/backup/custom_start.sh
-Restart=on-abort
-
+ExecStart = '.dirname(__FILE__).'/backup/custom_start.sh
 
 [Install]
-WantedBy=multi-user.target';
+WantedBy = multi-user.target';
 $file4 = fopen("backup/centvm.service", "a");
 fwrite($file4, $select2);
 fclose($file4);

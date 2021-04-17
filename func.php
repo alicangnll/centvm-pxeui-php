@@ -18,12 +18,27 @@ $veri = trim($veri);
 return $veri; 
 }
 
-function AlertBox($info) {
-	echo '<script>
+function Repair() {
+$cp_start = "cp ".dirname(__FILE__)."/backup/centvm.service /etc/systemd/system/";
+$sysctl_start = "systemctl start centvm.service";
+$sysctl_enable = "systemctl enable centvm.service";
+
+$stop_firewall = "systemctl stop firewalld";
+$disable_firewall = "systemctl disable firewalld";
+$enforce = "setenforce 0 && sed -i 's/SELINUX=enforcing/SELINUX=permissive/g' /etc/sysconfig/selinux";
+$chforce = "chmod -R 777 /var/lib/tftpboot/data";
+$choforce = "chown -R nobody:nobody /var/lib/tftpboot/data";
+$chcforce = "chcon -R -t httpd_sys_rw_content_t /var/lib/tftpboot/data";
+$semanage = "semanage fcontext -a -t httpd_sys_rw_content_t /var/lib/tftpboot/data";
+$restoreconforce = "/sbin/restorecon -R -v /var/lib/tftpboot";
+$selectz = '<br>'.$stop_firewall.'<br>'.$disable_firewall.'<br>'.$enforce.'<br>'.$chforce.'<br>'.$choforce.'<br>'.$chcforce.'<br>'.$semanage.'<br>'.$restoreconforce.'<br>';
+$info = '<p><p>Bilgi<br><hr></hr><pre>'.$cp_start.'<br>'.$sysctl_start.'<br>'.$sysctl_enable.'<br>'.$selectz.'<br></pre></p>';
+echo '<script>
 function BilgiRepair() {
 Metro.infobox.create("'.$info.'", "info");
 }
-</script>';
+</script>
+<center><br><a class="button success mt-5" onclick="BilgiRepair()" role="button">Repair / Bakım</a></center>';
 }
 
 function GetMicro() {
@@ -475,129 +490,35 @@ echo $ip;
     <title>'.strip_tags($baslik).'</title>
 </head>';
 }
-function NavBar($adminadi, $mail) {
-if($_SESSION["perm"] == md5("1")) {
-echo '<aside class="sidebar pos-absolute z-2"
-       data-role="sidebar"
-       data-toggle="#sidebar-toggle-3"
-       id="sb3"
-       data-shift=".shifted-content">
-    <div class="sidebar-header" data-image="https://metroui.org.ua/images/sb-bg-1.jpg">
-        <div class="avatar">
-            <img data-role="gravatar" data-email="'.strip_tags($mail).'">
-        </div>
-        <span class="title fg-white">Ali PXE Panel</span>
-        <span class="subtitle fg-white"> 2020 © Ali Can Gönüllü</span>
-    </div>
-    <ul class="sidebar-menu">
-    <li><a data-hotkey="Ctrl+1" href="index.php?git=pxeboot"><span class="mif-home icon"></span> Ev</a></li>
-    <li><a data-hotkey="Ctrl+2" href="index.php?git=logs"><span class="mif-paragraph-justify icon"></span> Loglar</a></li>
-    <li><a data-hotkey="Ctrl+3" href="index.php?git=addiso"><span class="mif-upload icon"></span> ISO Ekle</a></li>
-    <li><a data-hotkey="Ctrl+4" href="index.php?git=edit"><span class="mif-power icon"></span> DHCP Düzenle</a></li>
-	<li><a data-hotkey="Ctrl+5" href="index.php?git=speedtest"><span class="mif-power icon"></span> SpeedTest</a></li>
-    <li><a data-hotkey="Ctrl+6" href="index.php?git=admin"><span class="mif-power icon"></span>'.strip_tags($adminadi).'</a></li>
-	<li><a data-hotkey="Ctrl+7" href="index.php?git=mesaj"><span class="mif-attachment icon"></span> Mesaj</a></li>
-    <li><a data-hotkey="Ctrl+8" href="index.php?git=pxecikis"><span class="mif-power-cord icon"></span> Çıkış</a></li>
-    </ul>
-</aside>
-<div class="shifted-content h-100 p-ab">
-    <div class="app-bar pos-absolute bg-red z-1" data-role="appbar">
-        <button class="app-bar-item c-pointer" id="sidebar-toggle-3">
-            <span class="mif-menu fg-white"></span>
-        </button>
-    </div>';
-} else {
-echo '<aside class="sidebar pos-absolute z-2"
-       data-role="sidebar"
-       data-toggle="#sidebar-toggle-3"
-       id="sb3"
-       data-shift=".shifted-content">
-    <div class="sidebar-header" data-image="https://metroui.org.ua/images/sb-bg-1.jpg">
-        <div class="avatar">
-            <img data-role="gravatar" data-email="'.strip_tags($mail).'">
-        </div>
-        <span class="title fg-white">Ali PXE Panel</span>
-        <span class="subtitle fg-white"> 2020 © Ali Can Gönüllü</span>
-    </div>
-    <ul class="sidebar-menu">
-    <li><a data-hotkey="Ctrl+1" href="index.php?git=pxeboot"><span class="mif-home icon"></span> Ev</a></li>
-	<li><a data-hotkey="Ctrl+5" href="index.php?git=speedtest"><span class="mif-power icon"></span> SpeedTest</a></li>
-    <li><a data-hotkey="Ctrl+6" href="index.php?git=admin"><span class="mif-power icon"></span>'.strip_tags($adminadi).'</a></li>
-    <li><a data-hotkey="Ctrl+8" href="index.php?git=pxecikis"><span class="mif-power-cord icon"></span> Çıkış</a></li>
-    </ul>
-</aside>
-<div class="shifted-content h-100 p-ab">
-    <div class="app-bar pos-absolute bg-red z-1" data-role="appbar">
-        <button class="app-bar-item c-pointer" id="sidebar-toggle-3">
-            <span class="mif-menu fg-white"></span>
-        </button>
-    </div>';
-}
 
-}
+function Slider($url) {
+$ch = curl_init();
+curl_setopt($ch, CURLOPT_URL,$url);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
+curl_setopt($ch, CURLOPT_ENCODING, 'gzip, deflate');
 
-function NavBarEng($adminadi, $mail) {
-if($_SESSION["perm"] == md5("1")) {
-echo '<aside class="sidebar pos-absolute z-2"
-       data-role="sidebar"
-       data-toggle="#sidebar-toggle-3"
-       id="sb3"
-       data-shift=".shifted-content">
-    <div class="sidebar-header" data-image="https://metroui.org.ua/images/sb-bg-1.jpg">
-        <div class="avatar">
-            <img data-role="gravatar" data-email="'.strip_tags($mail).'">
-        </div>
-        <span class="title fg-white">Ali PXE Panel</span>
-        <span class="subtitle fg-white"> 2020 © Ali Can Gönüllü</span>
-    </div>
-    <ul class="sidebar-menu">
-    <li><a data-hotkey="Ctrl+1" href="index.php?git=pxeboot"><span class="mif-home icon"></span> Home</a></li>
-    <li><a data-hotkey="Ctrl+2" href="index.php?git=logs"><span class="mif-paragraph-justify icon"></span> Logs</a></li>
-    <li><a data-hotkey="Ctrl+3" href="index.php?git=addiso"><span class="mif-upload icon"></span> ISO Add</a></li>
-    <li><a data-hotkey="Ctrl+4" href="index.php?git=edit"><span class="mif-power icon"></span> DHCP Edit</a></li>
-	<li><a data-hotkey="Ctrl+5" href="index.php?git=speedtest"><span class="mif-power icon"></span> SpeedTest</a></li>
-    <li><a data-hotkey="Ctrl+6" href="index.php?git=admin"><span class="mif-power icon"></span>'.strip_tags($adminadi).'</a></li>
-    <li><a data-hotkey="Ctrl+7" href="index.php?git=mesaj"><span class="mif-attachment icon"></span> Message</a></li>
-    <li><a data-hotkey="Ctrl+8" href="index.php?git=pxecikis"><span class="mif-power-cord icon"></span> Exit</a></li>
-    </ul>
-</aside>
-<div class="shifted-content h-100 p-ab">
-    <div class="app-bar pos-absolute bg-red z-1" data-role="appbar">
-        <button class="app-bar-item c-pointer" id="sidebar-toggle-3">
-            <span class="mif-menu fg-white"></span>
-        </button>
-    </div>';
-} else {
-echo '<aside class="sidebar pos-absolute z-2"
-       data-role="sidebar"
-       data-toggle="#sidebar-toggle-3"
-       id="sb3"
-       data-shift=".shifted-content">
-    <div class="sidebar-header" data-image="https://metroui.org.ua/images/sb-bg-1.jpg">
-        <div class="avatar">
-            <img data-role="gravatar" data-email="'.strip_tags($mail).'">
-        </div>
-        <span class="title fg-white">Ali PXE Panel</span>
-        <span class="subtitle fg-white"> 2020 © Ali Can Gönüllü</span>
-    </div>
-    <ul class="sidebar-menu">
-    <li><a data-hotkey="Ctrl+1" href="index.php?git=pxeboot"><span class="mif-home icon"></span> Home</a></li>
-	<li><a data-hotkey="Ctrl+5" href="index.php?git=speedtest"><span class="mif-power icon"></span> SpeedTest</a></li>
-    <li><a data-hotkey="Ctrl+6" href="index.php?git=admin"><span class="mif-power icon"></span>'.strip_tags($adminadi).'</a></li>
-    <li><a data-hotkey="Ctrl+8" href="index.php?git=pxecikis"><span class="mif-power-cord icon"></span> Exit</a></li>
-    </ul>
-</aside>
-<div class="shifted-content h-100 p-ab">
-    <div class="app-bar pos-absolute bg-red z-1" data-role="appbar">
-        <button class="app-bar-item c-pointer" id="sidebar-toggle-3">
-            <span class="mif-menu fg-white"></span>
-        </button>
-    </div>';
-}
+$headers = array();
+$headers[] = 'Connection: keep-alive';
+$headers[] = 'Cache-Control: max-age=0';
+$headers[] = 'Upgrade-Insecure-Requests: 1';
+$headers[] = 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.193 Safari/537.36';
+$headers[] = 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9';
+$headers[] = 'Sec-Fetch-Site: none';
+$headers[] = 'Sec-Fetch-Mode: navigate';
+$headers[] = 'Sec-Fetch-User: ?1';
+$headers[] = 'Sec-Fetch-Dest: document';
+$headers[] = 'Accept-Language: tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7';
+$headers[] = 'Cookie: __gads=ID=bbdf811cdcc5a441-22401f55f9b8009e:T=1602771440:RT=1602771440:S=ALNI_Ma9VDtNpgD96ay24S5UNrI7pRYXHA; YoncuKoruma='.$_SERVER['REMOTE_ADDR'].'';
+curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 
+$json = curl_exec($ch);
+if (curl_errno($ch)) {
+echo 'Error:' . curl_error($ch);
 }
-
-function GetSlider($link1 ,$link2, $link3, $links1, $links2, $links3) {
+curl_close($ch);
+$obje2 = json_decode($json);
+if($_SESSION["lang"] == "TR") {
 echo '<div class="container">
 <nav data-role="ribbonmenu">
 
@@ -610,20 +531,18 @@ echo '<div class="container">
 <div class="content-holder">
 
 <div class="section" id="section-one">
-<p class="p-4"><a href="'.strip_tags($links1).'">'.strip_tags($link1).'</a></p>
+<p class="p-4"><a href="'.strip_tags($obje2->silderonelink).'">'.strip_tags($obje2->silderone).'</a></p>
 </div>
 
 <div class="section" id="section-two">
-<p class="p-4"><a href="'.strip_tags($links2).'">'.strip_tags($link2).'</a></p>
+<p class="p-4"><a href="'.strip_tags($obje2->sildertwolink).'">'.strip_tags($obje2->sildertwo).'</a></p>
 </div>
 
 <div class="section" id="section-three">
-<p class="p-4"><a href="'.strip_tags($links3).'">'.strip_tags($link3).'</a></p>
+<p class="p-4"><a href="'.strip_tags($obje2->silderthreelink).'">'.strip_tags($obje2->silderthree).'</a></p>
 </div>
 </div></div><br>';
-}
-
-function GetSliderEng($link1 ,$link2, $link3, $links1, $links2, $links3) {
+} else {
 echo '<div class="container">
 <nav data-role="ribbonmenu">
 
@@ -636,17 +555,18 @@ echo '<div class="container">
 <div class="content-holder">
 
 <div class="section" id="section-one">
-<p class="p-4"><a href="'.strip_tags($links1).'">'.strip_tags($link1).'</a></p>
+<p class="p-4"><a href="'.strip_tags($obje2->silderonelink).'">'.strip_tags($obje2->silderone).'</a></p>
 </div>
 
 <div class="section" id="section-two">
-<p class="p-4"><a href="'.strip_tags($links2).'">'.strip_tags($link2).'</a></p>
+<p class="p-4"><a href="'.strip_tags($obje2->sildertwolink).'">'.strip_tags($obje2->sildertwo).'</a></p>
 </div>
 
 <div class="section" id="section-three">
-<p class="p-4"><a href="'.strip_tags($links3).'">'.strip_tags($link3).'</a></p>
+<p class="p-4"><a href="'.strip_tags($obje2->silderthreelink).'">'.strip_tags($obje2->silderthree).'</a></p>
 </div>
 </div></div><br>';
+}
 }
 
 function logincheck($data) {
@@ -850,12 +770,378 @@ function KillMount($osname) {
   $kill = "umount /var/lib/tftpboot/data/".escapeshellcmd($osname)."/mount/";
 }
 
-  function Error($errorname) {
-    die('<td align="center" width="90" height="90">
-    <br></br>
-    <b><u>'.strip_tags($errorname).'</u></b>
-    <hr></hr>
-    <p>'.strip_tags($errorname).'</p></td>');
-  }
+function Error($errorname) {
+die('
+<td align="center" width="90" height="90">
+<br></br>
+<b><u>'.strip_tags($errorname).'</u></b>
+<hr></hr>
+<p>'.strip_tags($errorname).'</p></td>');
+}
+  
+function WGet($wget) {
+$yuklenecek_dosya = "wget -P /var/lib/tftpboot/data/iso ".escapeshellarg($wget)."";
+$stop_firewall = "systemctl stop firewalld";
+$syslinuxcfg = "setenforce 0 && sed -i 's/SELINUX=enforcing/SELINUX=permissive/g' /etc/sysconfig/selinux";
+$chmod_cfg = "chmod -R 777 /var/lib/tftpboot/data";
+$chown_cfg = "chown -R nobody:nobody /var/lib/tftpboot/data";
+$chcon_cfg = "chcon -R -t httpd_sys_rw_content_t /var/lib/tftpboot/data";
+$semanage_cfg = "semanage fcontext -a -t httpd_sys_rw_content_t /var/lib/tftpboot/data";
+$restorecon_cfg = "/sbin/restorecon -R -v /var/lib/tftpboot";
+
+echo '
+<div class="container card mt-5 mt-5">
+<div class="window-caption">
+<span class="title">ISO Yükleme Penceresi / ISO Upload Window</span>
+<div class="buttons">
+</div></div>
+
+<div class="window-content p-2">
+<pre>
+'.shell_exec($yuklenecek_dosya).'<br>
+'.shell_exec($stop_firewall).'<br>
+'.shell_exec($syslinuxcfg).'<br>
+'.shell_exec($chmod_cfg).'<br>
+'.shell_exec($chown_cfg).'<br>
+'.shell_exec($chcon_cfg).'<br>
+'.shell_exec($semanage_cfg).'<br>
+'.shell_exec($restorecon_cfg).'<br>
+</pre><br>
+<a type="button" class="button secondary" href="index.php?git=pxeboot" class="btn btn-dark">Ana Sayfa</a>
+</div></div></body>';
+}
+
+function OtherCommands() {
+if(file_exists("backup/centvm.service")) {
+unlink("backup/centvm.service");
+} else {
+}
+$select2 = '
+[Unit]
+Description=CentVM - PHP-based PXE Panel
+After=network.target
+
+[Service]
+Type=simple
+User=root
+ExecStart=sh '.dirname(__FILE__).'/backup/custom_start.sh
+Restart=on-abort
+
+
+[Install]
+WantedBy=multi-user.target
+';
+$file4 = fopen("backup/centvm.service", "a");
+fwrite($file4, $select2);
+fclose($file4);
+
+$stop_firewall = "systemctl stop firewalld";
+$disable_firewall = "systemctl disable firewalld";
+$enforce = "setenforce 0 && sed -i 's/SELINUX=enforcing/SELINUX=permissive/g' /etc/sysconfig/selinux";
+$chforce = "chmod -R 777 /var/lib/tftpboot/data";
+$choforce = "chown -R nobody:nobody /var/lib/tftpboot/data";
+$chcforce = "chcon -R -t httpd_sys_rw_content_t /var/lib/tftpboot/data";
+$semanage = "semanage fcontext -a -t httpd_sys_rw_content_t /var/lib/tftpboot/data";
+$restoreconforce = "/sbin/restorecon -R -v /var/lib/tftpboot";
+
+if(file_exists("backup/custom_start.sh")) {
+unlink("backup/custom_start.sh");
+} else {
+}
+
+$select = '
+'.$stop_firewall.'
+'.$disable_firewall.'
+'.$enforce.'
+'.$chforce.'
+'.$choforce.'
+'.$chcforce.'
+'.$semanage.'
+'.$restoreconforce.'';
+
+$file3 = fopen("backup/custom_start.sh", "a");
+fwrite($file3, $select);
+fclose($file3);
+
+$cp_start = "cp ".dirname(__FILE__)."/backup/centvm.service /etc/systemd/system/";
+$sysctl_start = "systemctl start centvm.service";
+$sysctl_enable = "systemctl enable centvm.service";
+$stop_firewall = "systemctl stop firewalld";
+$syslinuxcfg = "setenforce 0 && sed -i 's/SELINUX=enforcing/SELINUX=permissive/g' /etc/sysconfig/selinux";
+$chmod_cfg = "chmod -R 777 /var/lib/tftpboot/data";
+$chown_cfg = "chown -R nobody:nobody /var/lib/tftpboot/data";
+$chcon_cfg = "chcon -R -t httpd_sys_rw_content_t /var/lib/tftpboot/data";
+$semanage_cfg = "semanage fcontext -a -t httpd_sys_rw_content_t /var/lib/tftpboot/data";
+$restorecon_cfg = "/sbin/restorecon -R -v /var/lib/tftpboot";
+
+shell_exec($getcp);
+shell_exec($stop_firewall);
+shell_exec($syslinuxcfg);
+shell_exec($chmod_cfg);
+shell_exec($chown_cfg);
+shell_exec($chcon_cfg);
+shell_exec($semanage_cfg);
+shell_exec($restorecon_cfg);
+
+
+}
+function NavBarCont() {
+if($_SESSION["lang"] == "TR") {
+$mail = $_SESSION["mail_adres"];
+$adminadi = $_SESSION["admin_adi"];
+if($_SESSION["perm"] == md5("1")) {
+echo '<aside class="sidebar pos-absolute z-2"
+       data-role="sidebar"
+       data-toggle="#sidebar-toggle-3"
+       id="sb3"
+       data-shift=".shifted-content">
+    <div class="sidebar-header" data-image="https://metroui.org.ua/images/sb-bg-1.jpg">
+        <div class="avatar">
+            <img data-role="gravatar" data-email="'.strip_tags($mail).'">
+        </div>
+        <span class="title fg-white">Ali PXE Panel</span>
+        <span class="subtitle fg-white"> 2020 © Ali Can Gönüllü</span>
+    </div>
+    <ul class="sidebar-menu">
+    <li><a data-hotkey="Ctrl+1" href="index.php?git=pxeboot"><span class="mif-home icon"></span> Ev</a></li>
+    <li><a data-hotkey="Ctrl+2" href="index.php?git=logs"><span class="mif-paragraph-justify icon"></span> Loglar</a></li>
+    <li><a data-hotkey="Ctrl+3" href="index.php?git=addiso"><span class="mif-upload icon"></span> ISO Ekle</a></li>
+    <li><a data-hotkey="Ctrl+4" href="index.php?git=edit"><span class="mif-power icon"></span> DHCP Düzenle</a></li>
+	<li><a data-hotkey="Ctrl+5" href="index.php?git=speedtest"><span class="mif-power icon"></span> SpeedTest</a></li>
+    <li><a data-hotkey="Ctrl+6" href="index.php?git=admin"><span class="mif-power icon"></span>'.strip_tags($adminadi).'</a></li>
+	<li><a data-hotkey="Ctrl+7" href="index.php?git=mesaj"><span class="mif-attachment icon"></span> Mesaj</a></li>
+    <li><a data-hotkey="Ctrl+8" href="index.php?git=pxecikis"><span class="mif-power-cord icon"></span> Çıkış</a></li>
+    </ul>
+</aside>
+<div class="shifted-content h-100 p-ab">
+    <div class="app-bar pos-absolute bg-red z-1" data-role="appbar">
+        <button class="app-bar-item c-pointer" id="sidebar-toggle-3">
+            <span class="mif-menu fg-white"></span>
+        </button>
+    </div>';
+} else {
+echo '<aside class="sidebar pos-absolute z-2"
+       data-role="sidebar"
+       data-toggle="#sidebar-toggle-3"
+       id="sb3"
+       data-shift=".shifted-content">
+    <div class="sidebar-header" data-image="https://metroui.org.ua/images/sb-bg-1.jpg">
+        <div class="avatar">
+            <img data-role="gravatar" data-email="'.strip_tags($mail).'">
+        </div>
+        <span class="title fg-white">Ali PXE Panel</span>
+        <span class="subtitle fg-white"> 2020 © Ali Can Gönüllü</span>
+    </div>
+    <ul class="sidebar-menu">
+    <li><a data-hotkey="Ctrl+1" href="index.php?git=pxeboot"><span class="mif-home icon"></span> Ev</a></li>
+	<li><a data-hotkey="Ctrl+5" href="index.php?git=speedtest"><span class="mif-power icon"></span> SpeedTest</a></li>
+    <li><a data-hotkey="Ctrl+6" href="index.php?git=admin"><span class="mif-power icon"></span>'.strip_tags($adminadi).'</a></li>
+    <li><a data-hotkey="Ctrl+8" href="index.php?git=pxecikis"><span class="mif-power-cord icon"></span> Çıkış</a></li>
+    </ul>
+</aside>
+<div class="shifted-content h-100 p-ab">
+    <div class="app-bar pos-absolute bg-red z-1" data-role="appbar">
+        <button class="app-bar-item c-pointer" id="sidebar-toggle-3">
+            <span class="mif-menu fg-white"></span>
+        </button>
+    </div>';
+}
+} else {
+if($_SESSION["perm"] == md5("1")) {
+echo '<aside class="sidebar pos-absolute z-2"
+       data-role="sidebar"
+       data-toggle="#sidebar-toggle-3"
+       id="sb3"
+       data-shift=".shifted-content">
+    <div class="sidebar-header" data-image="https://metroui.org.ua/images/sb-bg-1.jpg">
+        <div class="avatar">
+            <img data-role="gravatar" data-email="'.strip_tags($mail).'">
+        </div>
+        <span class="title fg-white">Ali PXE Panel</span>
+        <span class="subtitle fg-white"> 2020 © Ali Can Gönüllü</span>
+    </div>
+    <ul class="sidebar-menu">
+    <li><a data-hotkey="Ctrl+1" href="index.php?git=pxeboot"><span class="mif-home icon"></span> Home</a></li>
+    <li><a data-hotkey="Ctrl+2" href="index.php?git=logs"><span class="mif-paragraph-justify icon"></span> Logs</a></li>
+    <li><a data-hotkey="Ctrl+3" href="index.php?git=addiso"><span class="mif-upload icon"></span> ISO Add</a></li>
+    <li><a data-hotkey="Ctrl+4" href="index.php?git=edit"><span class="mif-power icon"></span> DHCP Edit</a></li>
+	<li><a data-hotkey="Ctrl+5" href="index.php?git=speedtest"><span class="mif-power icon"></span> SpeedTest</a></li>
+    <li><a data-hotkey="Ctrl+6" href="index.php?git=admin"><span class="mif-power icon"></span>'.strip_tags($adminadi).'</a></li>
+    <li><a data-hotkey="Ctrl+7" href="index.php?git=mesaj"><span class="mif-attachment icon"></span> Message</a></li>
+    <li><a data-hotkey="Ctrl+8" href="index.php?git=pxecikis"><span class="mif-power-cord icon"></span> Exit</a></li>
+    </ul>
+</aside>
+<div class="shifted-content h-100 p-ab">
+    <div class="app-bar pos-absolute bg-red z-1" data-role="appbar">
+        <button class="app-bar-item c-pointer" id="sidebar-toggle-3">
+            <span class="mif-menu fg-white"></span>
+        </button>
+    </div>';
+} else {
+echo '<aside class="sidebar pos-absolute z-2"
+       data-role="sidebar"
+       data-toggle="#sidebar-toggle-3"
+       id="sb3"
+       data-shift=".shifted-content">
+    <div class="sidebar-header" data-image="https://metroui.org.ua/images/sb-bg-1.jpg">
+        <div class="avatar">
+            <img data-role="gravatar" data-email="'.strip_tags($mail).'">
+        </div>
+        <span class="title fg-white">Ali PXE Panel</span>
+        <span class="subtitle fg-white"> 2020 © Ali Can Gönüllü</span>
+    </div>
+    <ul class="sidebar-menu">
+    <li><a data-hotkey="Ctrl+1" href="index.php?git=pxeboot"><span class="mif-home icon"></span> Home</a></li>
+	<li><a data-hotkey="Ctrl+5" href="index.php?git=speedtest"><span class="mif-power icon"></span> SpeedTest</a></li>
+    <li><a data-hotkey="Ctrl+6" href="index.php?git=admin"><span class="mif-power icon"></span>'.strip_tags($adminadi).'</a></li>
+    <li><a data-hotkey="Ctrl+8" href="index.php?git=pxecikis"><span class="mif-power-cord icon"></span> Exit</a></li>
+    </ul>
+</aside>
+<div class="shifted-content h-100 p-ab">
+    <div class="app-bar pos-absolute bg-red z-1" data-role="appbar">
+        <button class="app-bar-item c-pointer" id="sidebar-toggle-3">
+            <span class="mif-menu fg-white"></span>
+        </button>
+    </div>';
+}
+}
+}
+
+function JSON() {
+?>
+<script charset="UTF-8">
+function cpu(){
+$.getJSON('netw.php?id=4', function(emp) { 
+document.getElementById("cpumodel").innerHTML = emp.data2;
+document.getElementById("cputrafic").innerHTML = emp.data;
+}); 
+}
+//FREERAM
+
+function freeram(){
+$.getJSON('netw.php?id=3', function(emp) { 
+document.getElementById("freeram").innerHTML = emp.data;
+}); 
+}
+//HDD Capacity 
+function hddusage(){
+$.getJSON('netw.php?id=5', function(emp) { 
+document.getElementById("hddusage").innerHTML = "" + emp.data + "%";
+}); 
+}
+//Uptime
+function uptime(){
+$.getJSON('netw.php?id=2', function(emp) { 
+document.getElementById("uptime").innerHTML = emp.data;
+}); 
+}
+
+$(document).ready(function() {
+$.getJSON('netw.php?id=5', function(emp) { 
+$('#hddusage').html('' + emp.data + '%'); 
+}); 	
+$.getJSON('netw.php?id=4', function(emp) { 
+$('#cputrafic').html('' + emp.data + ''); 
+$('#cpumodel').html('' + emp.data2 + ''); 
+}); 
+$.getJSON('netw.php?id=3', function(emp) { 
+$('#freeram').html('' + emp.data + ''); 
+}); 
+$.getJSON('netw.php?id=2', function(emp) { 
+$('#uptime').html('' + emp.data + ''); 
+});
+}); 
+
+jQuery(document).ready(function($){
+setInterval(function(){
+hddusage();
+cpu();
+freeram();
+}, 2000);
+});
+jQuery(document).ready(function($){
+setInterval(function(){
+uptime();
+}, 60000);
+});
+</script>
+<?php
+}
+function UnLinkISO($file_pointer) {
+if(!unlink($file_pointer)) {  
+echo ('
+<div class="container mt-5">
+<div class="window-caption">
+<span class="title">ISO Yükleme Penceresi / ISO Upload Window</span>
+</div>
+
+<div class="window-content">
+<b>'.$file_pointer.' silinemedi</b>
+</div></div></body>');  
+} else {  
+
+$stmt = $db->prepare('DELETE FROM boot_menu WHERE boot_isoname = :postID');
+$stmt->execute(array(':postID' => strip_tags($_GET["name"])));
+if($stmt){
+echo ('
+<div class="container mt-5">
+<div class="window-caption">
+<span class="title">ISO Yükleme Penceresi / ISO Upload Window</span>
+</div>
+
+<div class="window-content p-2">
+<b>'.$file_pointer.' başarıyla silindi</b><br>
+<pre>'.$txt.'</pre><br>
+<b>'.$shell6.'</b><br>
+</div></div></body>'); 
+}
+}
+}
+function ServerLog($int) {
+?>
+<head>
+<script type="text/javascript" src="js/jquery-1.4.2.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/flot/0.8.3/jquery.flot.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/flot/0.8.3/jquery.flot.time.min.js"></script>
+	
+<script id="source" language="javascript" type="text/javascript">
+$(document).ready(function() {
+var options = {
+lines: { show: true },
+points: { show: true },
+xaxis: { mode: "time" }
+};
+var data = [];
+var placeholder = $("#placeholder");
+$.plot(placeholder, data, options);
+var iteration = 0;
+function fetchData() {
+++iteration;
+    
+function onDataReceived(series) {
+
+data = [ series ];
+
+$.plot($("#placeholder"), data, options);
+fetchData();
+}
+    
+$.ajax({
+url: "netw.php?id=1&crd=<?php echo $int; ?>",
+method: 'GET',
+dataType: 'json',
+success: onDataReceived
+});
+
+}
+setTimeout(fetchData, 1000);
+});
+</script></head>
+<br><br><center>
+<div class="text-clear" id="placeholder" style="width:600px;height:300px;"></div>
+</center>
+<?php
+}
+
 }
 ?>

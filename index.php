@@ -4,7 +4,7 @@ include("conn.php");
 set_time_limit(0);
 if (file_exists("yukle.lock")) {
 } else {
-die("Yükleme yapılmamış (Eksik dosya : yukle.lock)<br><a href='install.php'>Yükle</a>");
+$getir->Error("Yükleme yapılmamış (Eksik dosya : yukle.lock)<br><a href='install.php'>Yükle</a>");
 }
 $getir = new PXEBoot();
 $getir->funcControl('shell_exec');
@@ -191,7 +191,7 @@ echo '
 exit();
     }
 } else {
-die("NON-POST");
+$getir->Error("NON-POST");
 }
 break;
 	
@@ -230,23 +230,7 @@ $_SESSION["mail_adres"] = strip_tags($rowq["admin_email"]);
 
 
 header('Location: index.php?git=pxeboot');
-
-$komut1 = "chcon -R -t httpd_sys_rw_content_t /var/lib/tftpboot/data";
-$komut2 = "semanage fcontext -a -t httpd_sys_rw_content_t /var/lib/tftpboot/data";
-$komut3 = "/sbin/restorecon -R -v /var/lib/tftpboot";
-$komut4 = "systemctl stop firewalld";
-$komut5 = "systemctl disable firewalld";
-$komut6 = "setenforce 0 && sed -i 's/SELINUX=enforcing/SELINUX=permissive/g' /etc/sysconfig/selinux";
-$komut7 = "chmod -R 777 /var/lib/tftpboot/data";
-$komut8 = "chown -R nobody:nobody /var/lib/tftpboot/data";
-shell_exec($komut4);
-shell_exec($komut5);
-shell_exec($komut6);
-shell_exec($komut7);
-shell_exec($komut8);
-shell_exec($komut1);
-shell_exec($komut2);
-shell_exec($komut3);
+$getir->OtherCommands();
 }
 
 } else {
@@ -271,113 +255,11 @@ $getir->GetUpdJSON("update.json", "".$verify."/update_get.json");
 } else {
 $getir->GetUpdJSONEng("update.json", "".$verify."/update_get.json");
 }
-
-$fh = fopen('/proc/meminfo','r');
-$mem = 0;
-while ($line = fgets($fh)) {
-  $pieces = array();
-  if (preg_match('/^MemTotal:\s+(\d+)\skB$/', $line, $pieces)) {
-    $mem = $pieces[1];
-    break;
-  }
-}
-function get_server_cpu_usage(){
-	$load = sys_getloadavg();
-	return intval($load[0]);
-}
-function get_server_memory_usage(){
-	$free = shell_exec('free');
-	$free = (string)trim($free);
-	$free_arr = explode("\n", $free);
-	$mem = explode(" ", $free_arr[1]);
-	$mem = array_filter($mem);
-	$mem = array_merge($mem);
-	$memory_usage = $mem[2]/$mem[1]*100;
-	return intval($memory_usage);
-}
-fclose($fh);
-$memus = memory_get_usage();
-$load = sys_getloadavg();
-
-$total = (disk_total_space("/")/1024);
-$available = (disk_free_space("/")/1024);
-$used = ($total - $available);
-$hdd_usage = intval($used/$total*100);
-
-$connections = "netstat -na | grep -v ESTABLISHED | grep 69 | grep -v 127.0.0.1 | wc -l";
-$totalconnections = "netstat -na | grep -v LISTEN | grep -v 127.0.0.1 | wc -l";
-$connections1 = shell_exec($connections);
-$totalconnections1 = shell_exec($totalconnections);
-
-if($_SESSION["lang"] == "TR") {
-$getir->NavBar($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
-} else {
-$getir->NavBarEng($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
-}
-echo '<br><br><div class="container page">
-    <h1 class="text-center">PXE ISO List</h1>
-</div>';
-
-echo '<center><div class="container row mt-2">';
-?>
-<script charset="UTF-8">
-function cpu(){
-$.getJSON('netw.php?id=4', function(emp) { 
-document.getElementById("cpumodel").innerHTML = emp.data2;
-document.getElementById("cputrafic").innerHTML = emp.data;
-}); 
-}
-//FREERAM
-
-function freeram(){
-$.getJSON('netw.php?id=3', function(emp) { 
-document.getElementById("freeram").innerHTML = emp.data;
-}); 
-}
-//HDD Capacity 
-function hddusage(){
-$.getJSON('netw.php?id=5', function(emp) { 
-document.getElementById("hddusage").innerHTML = "" + emp.data + "%";
-}); 
-}
-//Uptime
-function uptime(){
-$.getJSON('netw.php?id=2', function(emp) { 
-document.getElementById("uptime").innerHTML = emp.data;
-}); 
-}
-
-$(document).ready(function() {
-$.getJSON('netw.php?id=5', function(emp) { 
-$('#hddusage').html('' + emp.data + '%'); 
-}); 	
-$.getJSON('netw.php?id=4', function(emp) { 
-$('#cputrafic').html('' + emp.data + ''); 
-$('#cpumodel').html('' + emp.data2 + ''); 
-}); 
-$.getJSON('netw.php?id=3', function(emp) { 
-$('#freeram').html('' + emp.data + ''); 
-}); 
-$.getJSON('netw.php?id=2', function(emp) { 
-$('#uptime').html('' + emp.data + ''); 
-});
-}); 
-
-jQuery(document).ready(function($){
-setInterval(function(){
-hddusage();
-cpu();
-freeram();
-}, 2000);
-});
-jQuery(document).ready(function($){
-setInterval(function(){
-uptime();
-}, 60000);
-});
-</script>
-<?php
-echo '<div class="container cell-md-4 mt-4">
+$getir->NavBarCont();
+$getir->JSON();
+echo '
+<center><div class="container row mt-2 text-center">
+<div class="container cell-md-4 mt-4">
 <div class="icon-box border bd-default">
 <div class="icon bg-red fg-white"><span class="mif-cog"></span></div>
 <div class="content p-4">
@@ -385,17 +267,17 @@ echo '<div class="container cell-md-4 mt-4">
 
 <small class="text-upper text-bold text-lead" id="cpumodel"></small>
 <div class="text-upper text-bold text-lead" id="cputrafic"></div>
-</div></div></div>';
+</div></div></div>
 
-echo '<div class="container cell-md-4 mt-4">
+<div class="container cell-md-4 mt-4">
 <div class="icon-box border bd-default">
 <div class="icon bg-red fg-white"><span class="mif-codepen"></span></div>
 <div class="content p-4">
 <div class="text-upper">RAM Usage</div>
 <div class="text-upper text-bold text-lead" id="freeram"></div>
-</div></div></div>';
+</div></div></div>
 
-echo '<div class="container cell-md-4 mt-4">
+<div class="container cell-md-4 mt-4">
 <div class="icon-box border bd-default">
 <div class="icon bg-red fg-white"><span class="mif-drive"></span></div>
 <div class="content p-4">
@@ -409,111 +291,13 @@ echo '<div class="container cell-md-4 mt-4">
 <div class="content p-4">
 <div class="text-upper">Uptime</div>
 <div class="text-upper text-bold text-lead" id="uptime"></div>
-</div></div></div>';
-
-$cp_start = "cp ".dirname(__FILE__)."/backup/centvm.service /etc/systemd/system/";
-$sysctl_start = "systemctl start centvm.service";
-$sysctl_enable = "systemctl enable centvm.service";
-
-$stop_firewall = "systemctl stop firewalld";
-$disable_firewall = "systemctl disable firewalld";
-$enforce = "setenforce 0 && sed -i 's/SELINUX=enforcing/SELINUX=permissive/g' /etc/sysconfig/selinux";
-$chforce = "chmod -R 777 /var/lib/tftpboot/data";
-$choforce = "chown -R nobody:nobody /var/lib/tftpboot/data";
-$chcforce = "chcon -R -t httpd_sys_rw_content_t /var/lib/tftpboot/data";
-$semanage = "semanage fcontext -a -t httpd_sys_rw_content_t /var/lib/tftpboot/data";
-$restoreconforce = "/sbin/restorecon -R -v /var/lib/tftpboot";
-
-$selectz = '<br>'.$stop_firewall.'<br>'.$disable_firewall.'<br>'.$enforce.'<br>'.$chforce.'<br>'.$choforce.'<br>'.$chcforce.'<br>'.$semanage.'<br>'.$restoreconforce.'<br>';
-
-echo '</div></center><br>';
-$getir->AlertBox('<p><p>Bilgi<br><hr></hr><pre>'.$cp_start.'<br>'.$sysctl_start.'<br>'.$sysctl_enable.'<br>'.$selectz.'<br></pre></p>');
-
-
-shell_exec($stop_firewall);
-shell_exec($disable_firewall);
-shell_exec($enforce);
-shell_exec($chforce);
-shell_exec($choforce);
-shell_exec($chcforce);
-shell_exec($semanage);
-shell_exec($restoreconforce);
-if(file_exists("backup/centvm.service")) {
-unlink("backup/centvm.service");
-} else {
-}
-if(file_exists("backup/custom_start.sh")) {
-unlink("backup/custom_start.sh");
-} else {
-}
-$select = '
-'.$stop_firewall.'
-'.$disable_firewall.'
-'.$enforce.'
-'.$chforce.'
-'.$choforce.'
-'.$chcforce.'
-'.$semanage.'
-'.$restoreconforce.'';
-
-$file3 = fopen("backup/custom_start.sh", "a");
-fwrite($file3, $select);
-fclose($file3);
-
-$select2 = '
-[Unit]
-Description=CentVM - PHP-based PXE Panel
-After=network.target
-
-[Service]
-Type=simple
-User=root
-ExecStart=sh '.dirname(__FILE__).'/backup/custom_start.sh
-Restart=on-abort
-
-
-[Install]
-WantedBy=multi-user.target
-';
-$file4 = fopen("backup/centvm.service", "a");
-fwrite($file4, $select2);
-fclose($file4);
-
-
-
-echo '<center><br><a class="button success mt-5" onclick="BilgiRepair()" role="button">Repair / Bakım</a></center>';
-
-$ch = curl_init();
-curl_setopt($ch, CURLOPT_URL, ''.$verify.'/update_server.json');
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
-curl_setopt($ch, CURLOPT_ENCODING, 'gzip, deflate');
-
-$headers = array();
-$headers[] = 'Connection: keep-alive';
-$headers[] = 'Cache-Control: max-age=0';
-$headers[] = 'Upgrade-Insecure-Requests: 1';
-$headers[] = 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.193 Safari/537.36';
-$headers[] = 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9';
-$headers[] = 'Sec-Fetch-Site: none';
-$headers[] = 'Sec-Fetch-Mode: navigate';
-$headers[] = 'Sec-Fetch-User: ?1';
-$headers[] = 'Sec-Fetch-Dest: document';
-$headers[] = 'Accept-Language: tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7';
-$headers[] = 'Cookie: __gads=ID=bbdf811cdcc5a441-22401f55f9b8009e:T=1602771440:RT=1602771440:S=ALNI_Ma9VDtNpgD96ay24S5UNrI7pRYXHA; YoncuKoruma='.$_SERVER['REMOTE_ADDR'].'';
-curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-
-$json = curl_exec($ch);
-if (curl_errno($ch)) {
-echo 'Error:' . curl_error($ch);
-}
-curl_close($ch);
-$obje2 = json_decode($json);
-if($_SESSION["lang"] == "TR") {
-$getir->GetSlider($obje2->silderone, $obje2->sildertwo, $obje2->silderthree, $obje2->silderonelink, $obje2->sildertwolink, $obje2->silderthreelink);
-} else {
-$getir->GetSliderEng($obje2->silderone, $obje2->sildertwo, $obje2->silderthree, $obje2->silderonelink, $obje2->sildertwolink, $obje2->silderthreelink);
-}
+</div></div></div></center>
+<div class="container page text-center mt-4">
+    <h1 class="text-center">PXE ISO List</h1>
+</div>';
+$getir->OtherCommands();
+$getir->Repair();
+$getir->Slider(''.$verify.'/update_server.json');
 echo '<div class="container mt-5">
 <div class="window-caption">
 <span class="title">PXE ISO Info</span>
@@ -609,18 +393,13 @@ if($ext == "iso") {
 
 }
 }
-echo '</tbody></table>
-<br><br></div></body>';
+echo '</tbody></table></div></body>';
 break;
 
 case 'odeliso':
 $getir->logincheck($_COOKIE['admin_adi']);
 $getir->GetSuperPerm($_SESSION["perm"]);
-if($_SESSION["lang"] == "TR") {
-$getir->NavBar($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
-} else {
-$getir->NavBarEng($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
-}
+$getir->NavBarCont();
 echo '
 <div class="container mt-5">
 <div class="window-caption">
@@ -639,44 +418,8 @@ break;
 
 case 'deliso':
 $getir->logincheck($_COOKIE['admin_adi']);
-if($_SESSION["lang"] == "TR") {
-$getir->NavBar($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
-} else {
-$getir->NavBarEng($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
-}
-echo '</body>';
-$file_pointer = "/var/lib/tftpboot/data/iso/".strip_tags($_GET["name"])."";
-
-if(!unlink($file_pointer)) {  
-echo ('
-<div class="container mt-5">
-<div class="window-caption">
-<span class="title">ISO Yükleme Penceresi / ISO Upload Window</span>
-</div>
-
-<div class="window-content">
-<b>'.$file_pointer.' silinemedi</b>
-</div></div></body>');  
-} else {  
-
-$stmt = $db->prepare('DELETE FROM boot_menu WHERE boot_isoname = :postID');
-$stmt->execute(array(':postID' => strip_tags($_GET["name"])));
-if($stmt){
-echo ('
-<div class="container mt-5">
-<div class="window-caption">
-<span class="title">ISO Yükleme Penceresi / ISO Upload Window</span>
-</div>
-
-<div class="window-content p-2">
-<b>'.$file_pointer.' başarıyla silindi</b><br>
-<pre>'.$txt.'</pre><br>
-<b>'.$shell6.'</b><br>
-</div></div></body>'); 
-}
-
-
-}
+$getir->NavBarCont();
+$getir->UnLinkISO("/var/lib/tftpboot/data/iso/".strip_tags($_GET["name"])."");
 break;
 
 case 'logs':
@@ -689,56 +432,8 @@ $default = "cat /var/lib/tftpboot/pxelinux.cfg/default";
 $phpabout = "php -v | grep -v Zend | grep -v Copyright";
 $linuxinfo = "uname -a | grep -v grep";
 $hostname = "hostnamectl";
-if($_SESSION["lang"] == "TR") {
-$getir->NavBar($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
-} else {
-$getir->NavBarEng($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
-}
-
-?>
-
-<head>
-<script type="text/javascript" src="js/jquery-1.4.2.min.js"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/flot/0.8.3/jquery.flot.js"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/flot/0.8.3/jquery.flot.time.min.js"></script>
-	
-<script id="source" language="javascript" type="text/javascript">
-$(document).ready(function() {
-var options = {
-lines: { show: true },
-points: { show: true },
-xaxis: { mode: "time" }
-};
-var data = [];
-var placeholder = $("#placeholder");
-$.plot(placeholder, data, options);
-var iteration = 0;
-function fetchData() {
-++iteration;
-    
-function onDataReceived(series) {
-
-data = [ series ];
-
-$.plot($("#placeholder"), data, options);
-fetchData();
-}
-    
-$.ajax({
-url: "netw.php?id=1&crd=<?php echo $int; ?>",
-method: 'GET',
-dataType: 'json',
-success: onDataReceived
-});
-
-}
-setTimeout(fetchData, 1000);
-});
-</script></head>
-<br><br><center>
-<div class="text-clear" id="placeholder" style="width:600px;height:300px;"></div>
-</center>
-<?php
+$getir->NavBarCont();
+$getir->ServerLog($int);
 echo '<div class="container">
 <br>
 <b>Linux Bilgisi</b>
@@ -787,11 +482,7 @@ break;
 case 'edit':
 $getir->logincheck($_COOKIE['admin_adi']);
 $getir->GetSuperPerm($_SESSION["perm"]);
-if($_SESSION["lang"] == "TR") {
-$getir->NavBar($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
-} else {
-$getir->NavBarEng($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
-}
+$getir->NavBarCont();
 echo '
 <div class="container card mt-5">
 
@@ -875,7 +566,7 @@ tftp-root=/var/lib/tftpboot';
 $file3 = fopen("backup/dnsmasq.conf", "a");
 fwrite($file3, $select);
 fclose($file3);
-$getir->NavBar($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
+$getir->NavBarCont();
 $shell2 = shell_exec("rm -rf /etc/dnsmasq.conf");
 $shell3 = shell_exec("cp backup/dnsmasq.conf /etc/");
 echo '
@@ -902,11 +593,7 @@ break;
 
 case 'genpxe':
 $getir->logincheck($_COOKIE['admin_adi']);
-if($_SESSION["lang"] == "TR") {
-$getir->NavBar($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
-} else {
-$getir->NavBarEng($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
-}
+$getir->NavBarCont();
 echo '
 
 <div class="container card mt-5">
@@ -977,31 +664,11 @@ if (!file_exists($file)) {
   touch($file);
 }
 
-$stop_firewall = "systemctl stop firewalld";
-$syslinuxcfg = "setenforce 0 && sed -i 's/SELINUX=enforcing/SELINUX=permissive/g' /etc/sysconfig/selinux";
-$chmod_cfg = "chmod -R 777 /var/lib/tftpboot/data";
-$chown_cfg = "chown -R nobody:nobody /var/lib/tftpboot/data";
-$chcon_cfg = "chcon -R -t httpd_sys_rw_content_t /var/lib/tftpboot/data";
-$semanage_cfg = "semanage fcontext -a -t httpd_sys_rw_content_t /var/lib/tftpboot/data";
-$restorecon_cfg = "/sbin/restorecon -R -v /var/lib/tftpboot";
+$getir->OtherCommands();
 
-shell_exec($getcp);
-shell_exec($stop_firewall);
-shell_exec($syslinuxcfg);
-shell_exec($chmod_cfg);
-shell_exec($chown_cfg);
-shell_exec($chcon_cfg);
-shell_exec($semanage_cfg);
-shell_exec($restorecon_cfg);
-
-echo '';
-$getir->NavBar($_SESSION["admin_adi"], $_SESSION["mail_adres"]); 
+$getir->NavBarCont(); 
 if(intval($_POST["labelid"]) <= 1) {
-die("<p>PXE Data Unsuccesfully</p>
-<p>Label ID birden küçük olmamalı</p> 
-<br>
-<a class='button secondary'>Home Page / Ana Sayfa</a>
-</body>");
+$getir->Error("Label ID birden küçük olmamalı");
 } else {
 }
 
@@ -1087,97 +754,14 @@ break;
 
 case 'repair':
 $getir->logincheck($_COOKIE['admin_adi']);
-
-$stop_firewall = "systemctl stop firewalld";
-$disable_firewall = "systemctl disable firewalld";
-$enforce = "setenforce 0 && sed -i 's/SELINUX=enforcing/SELINUX=permissive/g' /etc/sysconfig/selinux";
-$chforce = "chmod -R 777 /var/lib/tftpboot/data";
-$choforce = "chown -R nobody:nobody /var/lib/tftpboot/data";
-$chcforce = "chcon -R -t httpd_sys_rw_content_t /var/lib/tftpboot/data";
-$semanage = "semanage fcontext -a -t httpd_sys_rw_content_t /var/lib/tftpboot/data";
-$restoreconforce = "/sbin/restorecon -R -v /var/lib/tftpboot";
-
-shell_exec($stop_firewall);
-shell_exec($disable_firewall);
-shell_exec($enforce);
-shell_exec($chforce);
-shell_exec($choforce);
-shell_exec($chcforce);
-shell_exec($semanage);
-shell_exec($restoreconforce);
-if(file_exists("backup/centvm.service")) {
-unlink("backup/centvm.service");
-} else {
-}
-if(file_exists("backup/custom_start.sh")) {
-unlink("backup/custom_start.sh");
-} else {
-}
-$select = ''.$stop_firewall.'
-'.$disable_firewall.'
-'.$enforce.'
-'.$chforce.'
-'.$choforce.'
-'.$chcforce.'
-'.$semanage.'
-'.$restoreconforce.'';
-$file3 = fopen("backup/custom_start.sh", "a");
-fwrite($file3, $select);
-fclose($file3);
-
-$select2 = '
-[Unit]
-Description=CentVM - PHP-based PXE Panel
-After=network.target
-
-[Service]
-Type=simple
-User=root
-ExecStart=sh '.dirname(__FILE__).'/backup/custom_start.sh
-Restart=on-abort
-
-
-[Install]
-WantedBy=multi-user.target
-';
-$file4 = fopen("backup/centvm.service", "a");
-fwrite($file4, $select2);
-fclose($file4);
-
-$cp_start = "cp ".dirname(__FILE__)."/backup/centvm.service /etc/systemd/system/";
-$sysctl_start = "systemctl start centvm.service";
-$sysctl_enable = "systemctl enable centvm.service";
-echo '
-<br>
-<div class="container card mt-5">
-<div class="window-caption">
-<span class="title">PXE Repair Info</span>
-<div class="buttons">
-</div></div>
-
-<div class="window-content p-2">
-<p>Lütfen Komut Bloğuna Bağlanıp <b>root</b> olarak komutları girin</p>
-<p>Yeniden başlatma gibi işlemlerde yapmanız gerekmektedir</p>
-<br>
-<pre>
-'.$cp_start.'
-'.$sysctl_start.'
-'.$sysctl_enable.'
-'.$select.'
-</pre>
-<br>
-<a type="button" class="button secondary" href="index.php?git=pxeboot" class="btn btn-dark">Ana Sayfa</a>
-</div></body>';
+$getir->NavBarCont();
+$getir->Repair();
 break;
 
 case 'addiso':
 $getir->GetSuperPerm($_SESSION["perm"]);
 $getir->logincheck($_COOKIE['admin_adi']);
-if($_SESSION["lang"] == "TR") {
-$getir->NavBar($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
-} else {
-$getir->NavBarEng($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
-}
+$getir->NavBarCont();
 
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_URL, ''.$otoinstaller_repo.'/get_oslist.php');
@@ -1302,11 +886,7 @@ $getir->GetSuperPerm($_SESSION["perm"]);
 $getir->logincheck($_COOKIE['admin_adi']);
 ini_set('post_max_size', '10240M'); 
 ini_set('upload_max_filesize', '10240M');
-if($_SESSION["lang"] == "TR") {
-$getir->NavBar($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
-} else {
-$getir->NavBarEng($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
-}
+$getir->NavBarCont();
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_URL, "".$otoinstaller_repo."/get_oslist.php?isoname=".strip_tags($_POST["server"])."");
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -1335,15 +915,7 @@ curl_close($ch);
 
 $obje4 = json_decode($json4, true);
 
-$yuklenecek_dosya = "wget -P /var/lib/tftpboot/data/iso ".escapeshellarg($obje4["0"]["iso_url"])."";
-$stop_firewall = "systemctl stop firewalld";
-$syslinuxcfg = "setenforce 0 && sed -i 's/SELINUX=enforcing/SELINUX=permissive/g' /etc/sysconfig/selinux";
-$chmod_cfg = "chmod -R 777 /var/lib/tftpboot/data";
-$chown_cfg = "chown -R nobody:nobody /var/lib/tftpboot/data";
-$chcon_cfg = "chcon -R -t httpd_sys_rw_content_t /var/lib/tftpboot/data";
-$semanage_cfg = "semanage fcontext -a -t httpd_sys_rw_content_t /var/lib/tftpboot/data";
-$restorecon_cfg = "/sbin/restorecon -R -v /var/lib/tftpboot";
-
+$getir->WGet($obje4["0"]["iso_url"]);
 echo '
 <div class="container mt-5">
 <div class="window-caption">
@@ -1371,11 +943,7 @@ $getir->GetSuperPerm($_SESSION["perm"]);
 $getir->logincheck($_COOKIE['admin_adi']);
 ini_set('post_max_size', '10240M'); 
 ini_set('upload_max_filesize', '10240M');
-if($_SESSION["lang"] == "TR") {
-$getir->NavBar($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
-} else {
-$getir->NavBarEng($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
-}
+$getir->NavBarCont();
 $dizin2 = '/var/lib/tftpboot/data/iso/';
 echo '</body>';
 
@@ -1407,15 +975,7 @@ $vhdext = "guestmount --add ".strip_tags($_FILES['dosya']['name']).".vhd --inspe
 }
 
 } else {
-die('<div class="container card mt-5">
-<div class="window-caption">
-<span class="title">ISO Yükleme / ISO Upload</span>
-<div class="buttons">
-</div></div>
-
-<div class="window-content p-2">
-<b>Uzantı desteklenmiyor</b>
-</div></div>');
+$getir->Error('Uzantı desteklenmiyor');
 }
 if(move_uploaded_file($_FILES['dosya']['tmp_name'], $path)) {
 $getcp = "mv ".dirname(__FILE__)."/backup/".basename($_FILES['dosya']['name'])." /var/lib/tftpboot/data/iso";
@@ -1473,11 +1033,7 @@ break;
 
 case 'speedtest':
 $getir->logincheck($_COOKIE['admin_adi']);
-if($_SESSION["lang"] == "TR") {
-$getir->NavBar($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
-} else {
-$getir->NavBarEng($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
-}
+$getir->NavBarCont();
 $getir->GetMicro();
 break;
 
@@ -1485,49 +1041,13 @@ break;
 case 'paddiso':
 $getir->GetSuperPerm($_SESSION["perm"]);
 $getir->logincheck($_COOKIE['admin_adi']);
-if($_SESSION["lang"] == "TR") {
-$getir->NavBar($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
-} else {
-$getir->NavBarEng($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
-}
-$yuklenecek_dosya = "wget -P /var/lib/tftpboot/data/iso ".escapeshellarg($_POST["wgetiso"])."";
-$stop_firewall = "systemctl stop firewalld";
-$syslinuxcfg = "setenforce 0 && sed -i 's/SELINUX=enforcing/SELINUX=permissive/g' /etc/sysconfig/selinux";
-$chmod_cfg = "chmod -R 777 /var/lib/tftpboot/data";
-$chown_cfg = "chown -R nobody:nobody /var/lib/tftpboot/data";
-$chcon_cfg = "chcon -R -t httpd_sys_rw_content_t /var/lib/tftpboot/data";
-$semanage_cfg = "semanage fcontext -a -t httpd_sys_rw_content_t /var/lib/tftpboot/data";
-$restorecon_cfg = "/sbin/restorecon -R -v /var/lib/tftpboot";
-
-echo '
-<div class="container card mt-5 mt-5">
-<div class="window-caption">
-<span class="title">ISO Yükleme Penceresi / ISO Upload Window</span>
-<div class="buttons">
-</div></div>
-
-<div class="window-content p-2">
-<pre>
-'.shell_exec($yuklenecek_dosya).'<br>
-'.shell_exec($stop_firewall).'<br>
-'.shell_exec($syslinuxcfg).'<br>
-'.shell_exec($chmod_cfg).'<br>
-'.shell_exec($chown_cfg).'<br>
-'.shell_exec($chcon_cfg).'<br>
-'.shell_exec($semanage_cfg).'<br>
-'.shell_exec($restorecon_cfg).'<br>
-</pre><br>
-<a type="button" class="button secondary" href="index.php?git=pxeboot" class="btn btn-dark">Ana Sayfa</a>
-</div></div></body>';
+$getir->NavBarCont();
+$getir->WGet($_POST["wgetiso"]);
 break;
 
 case 'admin':
 $getir->logincheck($_COOKIE['admin_adi']);
-if($_SESSION["lang"] == "TR") {
-$getir->NavBar($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
-} else {
-$getir->NavBarEng($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
-} 
+$getir->NavBarCont(); 
 if($_SESSION["perm"] == md5("1")) {
 echo '
 <br><br><div class="container card mt-5">
@@ -1587,11 +1107,7 @@ break;
 case 'deladmin':
 $getir->GetSuperPerm($_SESSION["perm"]);
 $getir->logincheck($_COOKIE['admin_adi']);
-if($_SESSION["lang"] == "TR") {
-$getir->NavBar($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
-} else {
-$getir->NavBarEng($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
-} 
+$getir->NavBarCont(); 
 $stmt = $db->prepare('DELETE FROM admin_list WHERE admin_id = :postID');
 $stmt->execute(array(':postID' => strip_tags($_GET["id"])));
 if($stmt){
@@ -1612,11 +1128,7 @@ break;
 case 'addadmin':
 $getir->GetSuperPerm($_SESSION["perm"]);
 $getir->logincheck($_COOKIE['admin_adi']);
-if($_SESSION["lang"] == "TR") {
-$getir->NavBar($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
-} else {
-$getir->NavBarEng($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
-} 
+$getir->NavBarCont(); 
 echo '
 
 <div class="container card mt-5">
@@ -1674,11 +1186,7 @@ break;
 case 'paddadmin':
 $getir->GetSuperPerm($_SESSION["perm"]);
 $getir->logincheck($_COOKIE['admin_adi']);
-if($_SESSION["lang"] == "TR") {
-$getir->NavBar($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
-} else {
-$getir->NavBarEng($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
-} 
+$getir->NavBarCont(); 
 $update = $db->prepare("INSERT INTO admin_list(admin_email, admin_usrname, admin_passwd, admin_token, admin_yetki) VALUES (:email, :usrname, :passwd, :token, :perm) ");
 $update->bindValue(':email', strip_tags($_POST["email"]));
 $update->bindValue(':usrname', strip_tags($_POST["username"]));
@@ -1704,11 +1212,7 @@ break;
 case 'resetpass':
 $getir->logincheck($_COOKIE['admin_adi']);
 
-if($_SESSION["lang"] == "TR") {
-$getir->NavBar($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
-} else {
-$getir->NavBarEng($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
-} 
+$getir->NavBarCont(); 
 
 $stmt = $db->prepare('SELECT * FROM admin_list WHERE admin_usrname = :admin');
 $stmt->execute(array(':admin' => $_SESSION["admin_adi"]));
@@ -1733,11 +1237,7 @@ break;
 
 case 'resettoken':
 $getir->logincheck($_COOKIE['admin_adi']);
-if($_SESSION["lang"] == "TR") {
-$getir->NavBar($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
-} else {
-$getir->NavBarEng($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
-} 
+$getir->NavBarCont(); 
 $stmt = $db->prepare('SELECT * FROM admin_list WHERE admin_usrname = :admin');
 $stmt->execute(array(':admin' => $_SESSION["admin_adi"]));
 if($row = $stmt->fetch()) {
@@ -1764,11 +1264,7 @@ break;
 
 case 'presettoken':
 $getir->logincheck($_COOKIE['admin_adi']);
-if($_SESSION["lang"] == "TR") {
-$getir->NavBar($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
-} else {
-$getir->NavBarEng($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
-} 
+$getir->NavBarCont(); 
 
 $update = $db->prepare("UPDATE admin_list SET admin_token = :token WHERE admin_usrname = :adi");
 $update->bindValue(':token',  sha1(md5($_POST["tokenw"])));
@@ -1804,11 +1300,7 @@ break;
 
 case 'presetpass':
 $getir->logincheck($_COOKIE['admin_adi']);
-if($_SESSION["lang"] == "TR") {
-$getir->NavBar($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
-} else {
-$getir->NavBarEng($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
-} 
+$getir->NavBarCont(); 
 
 $update = $db->prepare("UPDATE admin_list SET admin_passwd = :sifre WHERE admin_usrname = :adi");
 $update->bindValue(':sifre',  sha1(md5($_POST["passw"])));
@@ -1833,11 +1325,7 @@ break;
 case 'langupd':
 $getir->GetSuperPerm($_SESSION["perm"]);
 $getir->logincheck($_COOKIE['admin_adi']);
-if($_SESSION["lang"] == "TR") {
-$getir->NavBar($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
-} else {
-$getir->NavBarEng($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
-} 
+$getir->NavBarCont(); 
 $file = json_decode("update.json" ,true);
 
 echo '<div class="container card mt-5">
@@ -1867,11 +1355,7 @@ break;
 case 'plangupd':
 $getir->GetSuperPerm($_SESSION["perm"]);
 $getir->logincheck($_COOKIE['admin_adi']);
-if($_SESSION["lang"] == "TR") {
-$getir->NavBar($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
-} else {
-$getir->NavBarEng($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
-} 
+$getir->NavBarCont(); 
 
 $file = "update.json";
 if (file_exists($file)) {
@@ -1904,11 +1388,7 @@ break;
 
 case 'mesaj':
 $getir->logincheck($_COOKIE['admin_adi']);
-if($_SESSION["lang"] == "TR") {
-$getir->NavBar($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
-} else {
-$getir->NavBarEng($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
-} 
+$getir->NavBarCont(); 
 $ds = shell_exec('udevadm info --query=all --name=/dev/sda | grep ID_SERIAL_SHORT');
 $serialx = explode("=", $ds);
 $serial = $serialx[1];
@@ -2031,11 +1511,7 @@ break;
 
 case 'mesajgonder':
 $getir->logincheck($_COOKIE['admin_adi']);
-if($_SESSION["lang"] == "TR") {
-$getir->NavBar($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
-} else {
-$getir->NavBarEng($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
-} 
+$getir->NavBarCont(); 
 $url = "".$verify."/mesajgonder.php";
 $ds = shell_exec('udevadm info --query=all --name=/dev/sda | grep ID_SERIAL_SHORT');
 $serialx = explode("=", $ds);
@@ -2067,32 +1543,20 @@ break;
 
 case 'mesajgor':
 $getir->logincheck($_COOKIE['admin_adi']);
-if($_SESSION["lang"] == "TR") {
-$getir->NavBar($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
-} else {
-$getir->NavBarEng($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
-} 
+$getir->NavBarCont(); 
 $getir->GetMessages($verify, $_GET["id"]);
 break;
 
 case 'promotegor':
 $getir->logincheck($_COOKIE['admin_adi']);
-if($_SESSION["lang"] == "TR") {
-$getir->NavBar($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
-} else {
-$getir->NavBarEng($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
-} 
+$getir->NavBarCont(); 
 $getir->GetPromoteMessages($verify, $_GET["id"]);
 break;
 
 
 case 'community':
 $getir->logincheck($_COOKIE['admin_adi']);
-if($_SESSION["lang"] == "TR") {
-$getir->NavBar($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
-} else {
-$getir->NavBarEng($_SESSION["admin_adi"], $_SESSION["mail_adres"]);
-} 
+$getir->NavBarCont(); 
 
 $ds = shell_exec('udevadm info --query=all --name=/dev/sda | grep ID_SERIAL_SHORT');
 $serialx = explode("=", $ds);
@@ -2190,78 +1654,7 @@ window.location.replace("index.php");
 break;
 
 default:
-die('<script>
-document.cookie = "csrf_keygen=; expires=Thu, 18 Dec 2013 12:00:00 UTC";
-</script><style>
-@media (max-width:800px) {
-body {
-  background-image: url("https://source.unsplash.com/1080x1920/?turkey,türkiye,atatürk,şehir,manzara,deniz");
-  background-repeat: no-repeat;
-}
-.manzara {
-  background-color: rgb(0,0,0); /* Fallback color */
-  background-color: rgba(0,0,0, 0.4); /* Black w/opacity/see-through */
-  color: white;
-  font-weight: bold;
-  text-align: center;
-  padding: 15px;
-}
-.form-control {
-  background-color: rgb(0,0,0); /* Fallback color */
-  background-color: rgba(0,0,0, 0.4); /* Black w/opacity/see-through */
-  color: white;
-  box-shadow: 3px solid #f1f1f1;
-  z-index: 2;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 100%;
-}
-}
-@media (min-width:800px) {
-body {
-  background-image: url("https://source.unsplash.com/1920x1080/?turkey,türkiye,atatürk,şehir,manzara,deniz");
-  background-repeat: no-repeat;
-}
-.manzara {
-  background-color: rgb(0,0,0); /* Fallback color */
-  background-color: rgba(0,0,0, 0.4); /* Black w/opacity/see-through */
-  color: white;
-  box-shadow: 3px solid #f1f1f1;
-  z-index: 2;
-  position: absolute;
-  text-align: center;
-  top: 50%;
-  font-weight: bold;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 100%;
-}
-.form-control {
-  background-color: rgb(0,0,0); /* Fallback color */
-  background-color: rgba(0,0,0, 0.4); /* Black w/opacity/see-through */
-  color: white;
-  box-shadow: 3px solid #f1f1f1;
-  z-index: 2;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 100%;
-}
-
-.container  {
-border-radius: 20px;
-}
-
-}
-</style>
-<body class="container mx-auto text-center">
-<div class="manzara">
-<p class="mt-5 mb-3 text-muted" style="color:white;">Sayfa Bulunamadı</p><br><br>
-<a class="button primary" href="index.php">Ana Sayfa</a><br><br>
-</body></div>');
+$getir->Error('Sayfa Bulunamadı');
 break;
 }
 ?>

@@ -42,14 +42,7 @@ $uptimerep = str_replace("up", "", $uptime);
 echo '{"name":"uptime","data": "'.trim($uptimerep).'"}';
 } elseif(strip_tags($durum) == "3") { 
 
-$free = shell_exec('free');
-$free = (string)trim($free);
-	$free_arr = explode("\n", $free);
-	$mem = explode(" ", $free_arr[1]);
-	$mem = array_filter($mem);
-	$mem = array_merge($mem);
-	$memory_usage = $mem[2]/$mem[1]*100;
-echo '{"name":"freeram","data": "'.trim(intval($memory_usage)).'"}';
+echo '{"name":"freeram","data": "'.trim(intval(memory_get_usage()/1024)).'"}';
 } elseif(strip_tags($durum) == "4") { 
 function get_server_cpu_usage(){
 	$load = sys_getloadavg();

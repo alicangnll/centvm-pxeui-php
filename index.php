@@ -864,6 +864,17 @@ curl_close($ch);
 $obje4 = json_decode($json4, true);
 
 $getir->WGet($obje4["0"]["iso_url"]);
+if(empty($obje4["0"]["vmlinuz"])) {
+$cfg = "";
+} else {
+$getir->WGet($obje4["0"]["vmlinuz"]);
+$cfg = '
+LABEL 5
+MENU LABEL '.strip_tags($_POST["server"]).'
+kernel /var/lib/tftpboot/data/iso/vmlinuz
+initrd /var/lib/tftpboot/data/iso/initrd.img ip=dhcp inst.repo=http://10.32.5.1/CentOS-8.0.1905/x86_64/iso-contents-root/';
+}
+
 echo '
 <div class="container mt-5">
 <div class="window-caption">
@@ -881,6 +892,7 @@ URL : '.($obje4["0"]["iso_url"]).'<br>
 '.shell_exec($chcon_cfg).'<br>
 '.shell_exec($semanage_cfg).'<br>
 '.shell_exec($restorecon_cfg).'<br>
+'.strip_tags($cfg).'<br>
 </pre><br>
 <a type="button" class="button secondary" href="index.php?git=pxeboot" class="btn btn-dark">Ana Sayfa</a>
 </div></div></body>';

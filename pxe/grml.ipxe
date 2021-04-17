@@ -1,0 +1,5 @@
+#!ipxe
+
+kernel http://boot.leaseweb.com/memdisk raw
+initrd http://mirror.leaseweb.com/grml/devel/grml64-small_2020.06-rc1.iso
+boot

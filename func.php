@@ -1137,6 +1137,19 @@ setTimeout(fetchData, 1000);
 </center>
 <?php
 }
+function Extension($data, $text) {
+if(!extension_loaded($data)){
+echo '<tr>
+<td>'.$text.'</td>
+<td><font color="red">No</font></td>
+</tr><br><br>';
+} else {
+echo '<tr>
+<td>'.$text.'</td>
+<td><font color="green">OK</font></td>
+</tr>';
+}
+}
 
 }
 ?>

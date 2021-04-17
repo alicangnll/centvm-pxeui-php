@@ -65,15 +65,13 @@ if(file_exists("yukle.lock")) {
 	<br><br>
 	<a type="button" href="install.php?git=first_install" class="btn btn-dark">Devam Et</a>
 	</div>
-	</div></body>
-	<script>
-	document.cookie = "rootpwd= ; expires = Thu, 01 Jan 1970 00:00:00 GMT";
-	document.cookie = "netwdrv= ; expires = Thu, 01 Jan 1970 00:00:00 GMT";
-	document.cookie = "lang= ; expires = Thu, 01 Jan 1970 00:00:00 GMT";
-	document.cookie = "user_id= ; expires = Thu, 01 Jan 1970 00:00:00 GMT";
-	document.cookie = "admin_adi= ; expires = Thu, 01 Jan 1970 00:00:00 GMT";
-	document.cookie = "pxetype= ; expires = Thu, 01 Jan 1970 00:00:00 GMT";
-	</script>';
+	</div></body>';
+	$getir->DeleteCookie("rootpwd");
+	$getir->DeleteCookie("netwdrv");
+	$getir->DeleteCookie("lang");
+	$getir->DeleteCookie("user_id");
+	$getir->DeleteCookie("admin_adi");
+	$getir->DeleteCookie("pxetype");
 	break;
 
 	case 'first_install':
@@ -127,34 +125,6 @@ if(file_exists("yukle.lock")) {
 	break;
 
 	case 'license':
-	$httpd_chmod1 = "echo '".strip_tags($_COOKIE["rootpwd"])."' | sudo -S -k chmod -R 777 /var/lib/tftpboot/data";
-	$httpd_chown1 = "echo '".strip_tags($_COOKIE["rootpwd"])."' | sudo -S -k chown -R nobody:nobody /var/lib/tftpboot/data";
-	$httpd_selinux11 = "echo '".strip_tags($_COOKIE["rootpwd"])."' | sudo -S -k chcon -R -t httpd_sys_rw_content_t /var/lib/tftpboot/data";
-	$httpd_selinux21 = "echo '".strip_tags($_COOKIE["rootpwd"])."' | sudo -S -k semanage fcontext -a -t httpd_sys_rw_content_t /var/lib/tftpboot/data";
-	$tftp_syslinux21 = "echo '".strip_tags($_COOKIE["rootpwd"])."' | sudo -S -k	/sbin/restorecon -R -v /var/lib/tftpboot";
-	shell_exec($httpd_chmod1);
-	shell_exec($httpd_chown1);
-	shell_exec($httpd_selinux11);
-	shell_exec($httpd_selinux21);
-	shell_exec($tftp_syslinux21);
-
-	$stop_firewall = "systemctl stop firewalld";
-	$disable_firewall = "systemctl disable firewalld";
-	$enforce = "setenforce 0 && sed -i 's/SELINUX=enforcing/SELINUX=permissive/g' /etc/sysconfig/selinux";
-	$chforce = "chmod -R 777 /var/www/html";
-	$choforce = "chown -R nobody:nobody /var/www/html";
-	$chcforce = "chcon -R -t httpd_sys_rw_content_t /var/www/html";
-	$semanage = "semanage fcontext -a -t httpd_sys_rw_content_t /var/www/html";
-	$restoreconforce = "/sbin/restorecon -R -v /var/www/html";
-
-	shell_exec($stop_firewall);
-	shell_exec($disable_firewall);
-	shell_exec($enforce);
-	shell_exec($chforce);
-	shell_exec($choforce);
-	shell_exec($chcforce);
-	shell_exec($semanage);
-	shell_exec($restoreconforce);
 
 	if(file_exists("update.json")) {
 	unlink("update.json");
@@ -179,6 +149,7 @@ if(file_exists("yukle.lock")) {
 	</a></div></div></div>');
 	} else {
 	setcookie("rootpwd", strip_tags($_POST["rootpwd"]), time()+3600);
+	$getir->InstallThree($_POST["rootpwd"]);
 	}
 	
 	if(empty($_POST["netwdrv"])) {
@@ -330,28 +301,8 @@ if(file_exists("yukle.lock")) {
 	$mysqlserv = strip_tags($_POST["sqlserver"]);
 	$mysqlusr = strip_tags($_POST["sqlusr"]);
 	$mysqlpass = strip_tags($_POST["sqlpasswd"]);
-	$conn = new mysqli($mysqlserv, $mysqlusr, $mysqlpass);
-	$conn->query("SET CHARACTER SET utf8");
-	$conn->query("SET NAMES utf8");
-	$sql = "CREATE DATABASE pxe_boot";
+	$getir->ConnMysqli($mysqlserv, $mysqlusr, $mysqlpass);
 	
-	if ($conn->query($sql) === TRUE) {
-	
-	} else {
-	die('<body class="container">
-	<br><br><br>
-	<div class="mx-auto card">
-	<div class="card-body">
-	<b>MySQL Kurulumu | HATA</b>
-	<hr></hr>
-	<code>'.$conn->error.'<br></code><br>
-	<div class="form-group">
-	<br><br><a href="install.php?git=sql_install" " class="btn btn-dark">Tekrar Dene</button><br>
-	</div></div></div></body>');
-	}
-	$conn->close();
-	
-	$sql = mysqli_connect($mysqlserv, $mysqlusr, $mysqlpass, "pxe_boot");
 	$sqlSource = "CREATE TABLE `admin_list` (
 	`admin_id` int(11) NOT NULL,
 	`admin_email` varchar(255) COLLATE utf8_turkish_ci NOT NULL,
@@ -389,7 +340,7 @@ if(file_exists("yukle.lock")) {
 	ALTER TABLE `boot_menu`
 	MODIFY `boot_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 	COMMIT;";
-	mysqli_multi_query($sql,$sqlSource);
+	$getir->CreateMysqli($mysqlserv, $mysqlusr, $mysqlpass, $sqlSource);
 
 	$hostname = shell_exec("hostnamectl | grep -v hostname | grep -v Icon | grep -v Kernel | grep -v Chassis | grep -v Machine | grep -v Boot | grep -v Virtualization | grep -v CPE | grep -v Architecture");
 	$str1 = str_replace("Operating", "", $hostname);
@@ -420,63 +371,16 @@ if(file_exists("yukle.lock")) {
 
 
 	case 'install':
-	$hostname = shell_exec("hostnamectl | grep -v hostname | grep -v Icon | grep -v Kernel | grep -v Chassis | grep -v Machine | grep -v Boot | grep -v Virtualization | grep -v CPE | grep -v Architecture");
-	$str1 = str_replace("Operating", "", $hostname);
-	$str2 = str_replace(":", "", $str1);
-	$str3 = str_replace("System", "", $str2);
-	
-	//SYSLİNUX : OK
-	$firewall1 = "echo '".strip_tags($_COOKIE["rootpwd"])."' | sudo -S -k firewall-cmd --add-service=http --zone=public --permanent";
-	$firewall2 = "echo '".strip_tags($_COOKIE["rootpwd"])."' | sudo -S -k firewall-cmd --add-service=tftp --zone=public --permanent";
-	$firewall3 = "echo '".strip_tags($_COOKIE["rootpwd"])."' | sudo -S -k firewall-cmd --add-service=dhcp --zone=public --permanent";
-	$firewall4 = "echo '".strip_tags($_COOKIE["rootpwd"])."' | sudo -S -k firewall-cmd --add-service=dns --zone=public --permanent";
-	$firewall5 = "echo '".strip_tags($_COOKIE["rootpwd"])."' | sudo -S -k firewall-cmd --add-service=ftp --zone=public --permanent";
-	$firewall6 = "echo '".strip_tags($_COOKIE["rootpwd"])."' | sudo -S -k firewall-cmd --zone=public --permanent --add-port=69/udp";
-	$firewall7 = "echo '".strip_tags($_COOKIE["rootpwd"])."' | sudo -S -k firewall-cmd --zone=public --permanent --add-port=4011/udp";
-	$firewall8 = "echo '".strip_tags($_COOKIE["rootpwd"])."' | sudo -S -k firewall-cmd --reload";
-	
 	setcookie("pxetype", intval($_POST["pxetype"]), time()+3600); 
-	
 	if(intval($_COOKIE["pxetype"]) == "0") {
-	$installer = "echo '".strip_tags($_COOKIE["rootpwd"])."' | sudo -S -k yum install -y epel-release tftp tftp-server xinetd syslinux net-tools dnsmasq zip nfs-utils tar wget policycoreutils-python-utils libguestfs-tools bind-utils";
-	$mk_syslinuxfolder = "echo '".strip_tags($_COOKIE["rootpwd"])."' | sudo -S -k mkdir /var/lib/tftpboot/pxelinux.cfg";
-	$copy_syslinux = "echo '".strip_tags($_COOKIE["rootpwd"])."' | sudo -S -k cp -v /usr/share/syslinux/* /var/lib/tftpboot";
-	shell_exec($installer);
-	shell_exec($mk_syslinuxfolder);
-	shell_exec($copy_syslinux);
-	shell_exec($firewall1);
-	shell_exec($firewall2);
-	shell_exec($firewall3);
-	shell_exec($firewall4);
-	shell_exec($firewall5);
-	shell_exec($firewall6);
-	shell_exec($firewall7);
-	shell_exec($firewall8);
-	
+	$getir->InstallOne($_COOKIE["rootpwd"]);
 	echo '<body class="container">
 	<br><br><br>
 	<div class="mx-auto card">
 	<div class="card-body">
 	<b>Önyükleme İşlemi</b>
 	<b> Sistem Türü : CentOS </b><br>
-	<hr></hr>
-	<code>
-	//For CentOS 7 Special <br>
-	yum provides semanage<br>
-	yum -y install policycoreutils-python-2.5-34.el7.x86_64<br>
-	//Finished for CentOS7 Special<br>
-	'.$installer.'<br>
-	'.$mk_syslinuxfolder.'<br>
-	'.$copy_syslinux.'<br>
-	'.$firewall1.'<br>
-	'.$firewall2.'<br>
-	'.$firewall3.'<br>
-	'.$firewall4.'<br>
-	'.$firewall5.'<br>
-	'.$firewall6.'<br>
-	'.$firewall7.'<br>
-	'.$firewall8.'<br>
-	</code><br>
+	<br>
 	<a type="button" href="install.php?git=install2" class="btn btn-dark">DHCP Server Kurulumu</a>
 	</div>
 	</div></body>';
@@ -505,10 +409,10 @@ if(file_exists("yukle.lock")) {
 	<form action="install.php?git=pinstall2" method="post">';
 	$netw = shell_exec('ls /sys/class/net');
 	$oparray = preg_split("#[\r\n]+#", $netw);
+	$array = array();
 	echo '<div class="form-group">
 	<select class="form-control form-select" aria-label="Network Driver" id="intname" name="intname">
 	<option selected>Network Driver</option>';
-	$array = array();
 	foreach($oparray as $line){
 	echo '<option value="'.$line.'">'.$line.'</option>';
 	}
@@ -537,31 +441,15 @@ if(file_exists("yukle.lock")) {
 	break;
 
 	case 'pinstall2':
-	if (file_exists("backup/dnsmasq.conf")) {
-	unlink("backup/dnsmasq.conf");
-	touch("backup/dnsmasq.conf");
-	} else {
-	touch("backup/dnsmasq.conf");
-	}
-	if (file_exists("backup/tftp")) {
-	unlink("backup/tftp");
-	touch("backup/tftp");
-	} else {
-	touch("backup/tftp");
-	}
-	if (file_exists("backup/pxeboot.conf")) {
-	unlink("backup/pxeboot.conf");
-	touch("backup/pxeboot.conf");
-	} else {
-	touch("backup/pxeboot.conf");
-	}
-	if (file_exists("backup/default")) {
-	unlink("backup/default");
-	touch("backup/default");
-	} else {
-	touch("backup/default");
-	}
+	$getir->FileControl("backup/dnsmasq.conf");
+	$getir->FileControl("backup/tftp");
+	$getir->FileControl("backup/pxeboot.conf");
+	$getir->FileControl("backup/default");
+	
 	if(intval($_COOKIE["pxetype"]) == "0") {
+	$getir->HttpdFile();
+	$getir->TFTPFile($_COOKIE["pxetype"]);
+	$getir->DNSMASQCfg($_COOKIE["pxetype"]);
 	} else {
 	die('<body class="container">
 	<br><br><br>
@@ -573,223 +461,16 @@ if(file_exists("yukle.lock")) {
 	<a type="button" href="install.php?git=install3" class="btn btn-dark">Kurulumu Bitir</a>
 	</div></div></body>');
 	}
-	$httpdcfg = "
-	<IfModule mod_dav_fs.c>
-	DAVLockDB /var/lib/dav/lockdb
-	</IfModule>
-	<VirtualHost *:80>
-	ServerAdmin webmaster@localhost
-	DocumentRoot /var/www/html
-	Alias /pxeboot /var/lib/tftpboot/data
-	<Directory /var/lib/tftpboot/data>
-	DAV On
-	Options Indexes FollowSymLinks
-	Require all granted
-	</Directory>
-	</VirtualHost>";
-	$file1 = fopen("backup/pxeboot.conf", "a");
-	fwrite($file1, $httpdcfg);
-	fclose($file1);
-
+	$getir->DefaultFile();
 	if(intval($_COOKIE["pxetype"]) == "0") {
-	$tftpconf = "
-	service tftp
-	{
-	socket_type	= dgram
-	protocol	= udp
-	wait		= yes
-	user		= root
-	server		= /usr/sbin/in.tftpd
-	server_args	= -c /var/lib/tftpboot
-	disable		= no
-	per_source	= 11
-	cps		= 100 2
-	flags		= IPv4
-	}";
-	} else {
-	$tftpconf = "
-	service tftp
-	{
-	protocol        = udp
-	port            = 69
-	socket_type     = dgram
-	wait            = yes
-	user            = root
-	server          = /usr/sbin/in.tftpd
-	server_args     = -v -v -v -v -v --map-file /var/lib/tftpboot/map-file /var/lib/tftpboot
-	disable         = no
-	# This is a workaround for Fedora, where TFTP will listen only on
-	# IPv6 endpoint, if IPv4 flag is not used.
-	flags           = IPv4
-	}";
-	}
-	$file2 = fopen("backup/tftp", "a");
-	fwrite($file2, $tftpconf);
-	fclose($file2);
+	$getir->InstallerTwo($_COOKIE["rootpwd"]);
 
-	if(intval($_COOKIE["pxetype"]) == "0") {
-	$select = '#VBox Config
-	# DHCP on Virtualbox https://jpmens.net/2018/03/07/dhcp-in-virtualbox-hosts/
-	# Vbox Extension Pack : https://download.virtualbox.org/virtualbox/6.1.8/Oracle_VM_VirtualBox_Extension_Pack-6.1.8.vbox-extpack
-	# Enable DHCP Server
-	port=0
-	interface='.strip_tags($_POST["intname"]).'
-	# DHCP range-leases
-	dhcp-range='.strip_tags($_POST["serverlowrange"]).','.strip_tags($_POST["serverhighrange"]).','.strip_tags($_POST["servergateway"]).',12h
-	# DNS
-	dhcp-option=option:dns-server,'.strip_tags($_POST["serverip"]).'
-
-	dhcp-boot=pxelinux.0
-	pxe-service=x86PC, "PXE Boot Manager / By Ali Can Gonullu", pxelinux
-	# Enable TFTP
-	enable-tftp
-	tftp-root=/var/lib/tftpboot';
-	} else {
-	$pxefile = "centos8.ipxe";
-	$com1 = "".dirname(__FILE__)."/pxe/".$pxefile."";
-	$select = '#VBox Config
-	# DHCP on Virtualbox https://jpmens.net/2018/03/07/dhcp-in-virtualbox-hosts/
-	# Vbox Extension Pack : https://download.virtualbox.org/virtualbox/6.1.8/Oracle_VM_VirtualBox_Extension_Pack-6.1.8.vbox-extpack
-	# Enable DHCP Server
-	port=0
-	interface='.strip_tags($_POST["intname"]).'
-	# DHCP range-leases
-	dhcp-range='.strip_tags($_POST["serverlowrange"]).','.strip_tags($_POST["serverhighrange"]).','.strip_tags($_POST["servergateway"]).',12h
-	# Enable TFTP
-	enable-tftp
-	tftp-root=/var/lib/tftpboot
-	# DNS
-	dhcp-option=option:dns-server,'.strip_tags($_POST["serverip"]).'
-	dhcp-userclass=set:ipxe,iPXE
-	dhcp-boot='.$com1.'
-	log-queries
-	log-dhcp';
-	}
-	$file3 = fopen("backup/dnsmasq.conf", "a");
-	fwrite($file3, $select);
-	fclose($file3);
-
-if(intval($_COOKIE["pxetype"]) == "0") {
-$default = "default menu.c32
-prompt 0
-timeout 100
-
-# Local Hard Disk pxelinux.cfg default entry
-menu title PXE Boot Menu By Ali Can
-LABEL 1
-		MENU LABEL Boot local hard drive
-		MENU AUTOBOOT
-		MENU DEFAULT
-		LOCALBOOT 0";
-$cp_default = "echo '".strip_tags($_COOKIE["rootpwd"])."' | sudo -S -k cp ".dirname(__FILE__)."/backup/default /var/lib/tftpboot/pxelinux.cfg/";
-$default_chmod = "echo '".strip_tags($_COOKIE["rootpwd"])."' | sudo -S -k chmod -R 777 /var/lib/tftpboot/pxelinux.cfg";
-$mkdir = "echo '".strip_tags($_COOKIE["rootpwd"])."' | sudo -S -k mkdir /var/lib/tftpboot/data";
-$mkdir2 = "echo '".strip_tags($_COOKIE["rootpwd"])."' | sudo -S -k mkdir /var/lib/tftpboot/data/iso";
-$touch_nfserver = 'echo "/var/lib/tftpboot/data	*(rw)" >> /etc/exports';
-//NFS SERVER : OK
-$httpd_chmod = "echo '".strip_tags($_COOKIE["rootpwd"])."' | sudo -S -k chmod -R 777 /var/lib/tftpboot/data";
-$httpd_chown = "echo '".strip_tags($_COOKIE["rootpwd"])."' | sudo -S -k chown -R nobody:nobody /var/lib/tftpboot/data";
-$httpd_selinux1 = "echo '".strip_tags($_COOKIE["rootpwd"])."' | sudo -S -k chcon -R -t httpd_sys_rw_content_t /var/lib/tftpboot/data";
-$httpd_selinux2 = "echo '".strip_tags($_COOKIE["rootpwd"])."' | sudo -S -k semanage fcontext -a -t httpd_sys_rw_content_t /var/lib/tftpboot/data";
-$tftp_syslinux2 = "echo '".strip_tags($_COOKIE["rootpwd"])."' | sudo -S -k	/sbin/restorecon -R -v /var/lib/tftpboot";
-//HTTPD : OK
-// Perm Problem Solve :
-// systemctl stop firewalld
-// setenforce 0 && sed -i 's/SELINUX=enforcing/SELINUX=permissive/g' /etc/sysconfig/selinux
-// chmod -R 777 /var/lib/tftpboot/data
-// chown -R nobody:nobody /var/lib/tftpboot/data
-// chcon -R -t httpd_sys_rw_content_t /var/lib/tftpboot/data
-// semanage fcontext -a -t httpd_sys_rw_content_t /var/lib/tftpboot/data
-// /sbin/restorecon -R -v /var/lib/tftpboot
-$firewall_stop = "echo '".strip_tags($_COOKIE["rootpwd"])."' | sudo -S -k systemctl stop firewalld";
-$firewall_disable = "echo '".strip_tags($_COOKIE["rootpwd"])."' | sudo -S -k systemctl disable firewalld";
-
-$syslinux_conf = "echo '".strip_tags($_COOKIE["rootpwd"])."' | sudo -S -k setenforce 0 && sed -i 's/SELINUX=enforcing/SELINUX=permissive/g' /etc/sysconfig/selinux";
-//SYSLİNUX : OK
-
-$httpd_cp = "echo '".strip_tags($_COOKIE["rootpwd"])."' | sudo -S -k cp ".dirname(__FILE__)."/backup/pxeboot.conf /etc/httpd/conf.d/";
-$tftp_cp = "echo '".strip_tags($_COOKIE["rootpwd"])."' | sudo -S -k cp ".dirname(__FILE__)."/backup/tftp /etc/xinetd.d/";
-$dnsmasq_chmod = "echo '".strip_tags($_COOKIE["rootpwd"])."' | sudo -S -k chmod 777 /etc/dnsmasq.conf";
-$dnsmasq_cp = "echo '".strip_tags($_COOKIE["rootpwd"])."' | sudo -S -k cp ".dirname(__FILE__)."/backup/dnsmasq.conf /etc/";
-
-$xinetd = "echo '".strip_tags($_COOKIE["rootpwd"])."' | sudo -S -k systemctl start xinetd";
-$xinetd_enab = "echo '".strip_tags($_COOKIE["rootpwd"])."' | sudo -S -k systemctl enable xinetd";
-$dnsmasq = "echo '".strip_tags($_COOKIE["rootpwd"])."' | sudo -S -k systemctl restart dnsmasq";
-$dnsmasq_enab = "echo '".strip_tags($_COOKIE["rootpwd"])."' | sudo -S -k systemctl enable dnsmasq";
-$tftp = "echo '".strip_tags($_COOKIE["rootpwd"])."' | sudo -S -k systemctl restart tftp";
-$tftp_enab = "echo '".strip_tags($_COOKIE["rootpwd"])."' | sudo -S -k systemctl enable tftp";
-$nfsserver = "echo '".strip_tags($_COOKIE["rootpwd"])."' | sudo -S -k systemctl start nfs-server";
-$httpserver = "echo '".strip_tags($_COOKIE["rootpwd"])."' | sudo -S -k systemctl restart httpd";
-//<b> Windows Server NFS Server Connect : https://www.rootusers.com/how-to-mount-an-nfs-share-in-windows-server-2016/</b>
-//<b> Windows NFS Server Connect : https://graspingtech.com/mount-nfs-share-windows-10/</b>
-// <b> TFTP Server Connect FreeDOS : </b>
-	shell_exec($cp_default);
-	shell_exec($default_chmod);
-	shell_exec($httpd_cp);
-	shell_exec($tftp_cp);
-	shell_exec($dnsmasq_chmod);
-	shell_exec($dnsmasq_cp);
-
-	$file4 = fopen("backup/default", "a");
-	fwrite($file4, $default);
-	fclose($file4);
-	$fp = fopen("/var/lib/tftpboot/pxelinux.cfg/default","wb");
-	fwrite($fp,$default);
-	fclose($fp);
-
-	shell_exec($touch_nfserver);
-	shell_exec($mkdir);
-	shell_exec($mkdir2);
-	shell_exec($firewall_stop);
-	shell_exec($firewall_disable);
-	shell_exec($syslinux_conf);
-
-	shell_exec($httpd_chmod);
-	shell_exec($httpd_chown);
-	shell_exec($httpd_selinux1);
-	shell_exec($httpd_selinux2);
-
-	shell_exec($xinetd);
-	shell_exec($xinetd_enab);
-	shell_exec($dnsmasq);
-	shell_exec($dnsmasq_enab);
-	shell_exec($tftp);
-	shell_exec($tftp_enab);
-	shell_exec($nfsserver);
-	shell_exec($httpserver);
 	echo '<body class="container">
 	<br><br><br>
 	<div class="mx-auto card">
 	<div class="card-body">
 	<b>Ana Yükleme İşlemi</b>
-	<hr></hr>
-	<code>
-	'.$cp_default.'<br>
-	'.$default_chmod.'<br>
-	'.$httpd_cp.'<br>
-	'.$tftp_cp.'<br>
-	'.$dnsmasq_chmod.'<br>
-	'.$dnsmasq_cp.'<br>
-	'.$touch_nfserver.'<br>
-	'.$mkdir.'<br>
-	'.$mkdir2.'<br>
-	'.$firewall_stop.'<br>
-	'.$firewall_disable.'<br>
-	'.$syslinux_conf.'<br>
-	'.$httpd_chmod.'<br>
-	'.$httpd_chown.'<br>
-	'.$httpd_selinux1.'<br>
-	'.$httpd_selinux2.'<br>
-	'.$tftp_syslinux2.'<br>
-	'.$xinetd.'<br>
-	'.$xinetd_enab.'<br>
-	'.$dnsmasq.'<br>
-	'.$dnsmasq_enab.'<br>
-	'.$tftp.'<br>
-	'.$tftp_enab.'<br>
-	'.$nfsserver.'<br>
-	'.$httpserver.'<br>
-	</code><br>
+	<br><br>
 	<a type="button" href="install.php?git=install3" class="btn btn-dark">Kurulumu Bitir</a>
 	</div></div></body>';
 	} else {
@@ -803,19 +484,11 @@ $httpserver = "echo '".strip_tags($_COOKIE["rootpwd"])."' | sudo -S -k systemctl
 	<a type="button" href="install.php?git=install3" class="btn btn-dark">Kurulumu Bitir</a>
 	</div></div></body>');
 	}
-break;
+	break;
 
-case 'install3':
-	if(file_exists("yukle.lock")) {
-	unlink("yukle.lock");
-	} else {
-	}
-	$txt = md5(rand(5,15));
-	$fp = fopen("yukle.lock","a");
-	fwrite($fp,$txt);
-	fclose($fp);
+	case 'install3':
+	$getir->CreateLock("yukle.lock");
 	$getir->OtherCommands();
-
 	echo '<body class="container">
 	<br><br><br>
 	<div class="mx-auto card">
@@ -825,15 +498,13 @@ case 'install3':
 	<p>Yükleme Tamamlandı. Artık Server hazır durumdadır.</p>
 	<a type="button" href="index.php" class="btn btn-dark">Devam Et</a>
 	<br>
-	</body>
-	<script>
-	document.cookie = "rootpwd= ; expires = Thu, 01 Jan 1970 00:00:00 GMT";
-	document.cookie = "netwdrv= ; expires = Thu, 01 Jan 1970 00:00:00 GMT";
-	document.cookie = "lang= ; expires = Thu, 01 Jan 1970 00:00:00 GMT";
-	document.cookie = "user_id= ; expires = Thu, 01 Jan 1970 00:00:00 GMT";
-	document.cookie = "admin_adi= ; expires = Thu, 01 Jan 1970 00:00:00 GMT";
-	document.cookie = "pxetype= ; expires = Thu, 01 Jan 1970 00:00:00 GMT";
-	</script>';
-break;
+	</body>';
+	$getir->DeleteCookie("rootpwd");
+	$getir->DeleteCookie("netwdrv");
+	$getir->DeleteCookie("lang");
+	$getir->DeleteCookie("user_id");
+	$getir->DeleteCookie("admin_adi");
+	$getir->DeleteCookie("pxetype");
+	break;
 }
 ?>

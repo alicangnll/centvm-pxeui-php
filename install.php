@@ -488,7 +488,7 @@ if(file_exists("yukle.lock")) {
 	<b>Ana Yükleme İşlemi</b>
 	<hr></hr>
 	<code>iPXE : Soon</code><br>
-	<a type="button" href="install.php" class="btn btn-dark">Kurulumu Bitir</a>
+	<a type="button" href="install.php?git=install3" class="btn btn-dark">Kurulumu Bitir</a>
 	</div></div></body>');
 	}
 	//OK
@@ -561,27 +561,40 @@ if(file_exists("yukle.lock")) {
 	} else {
 	touch("backup/default");
 	}
-$httpdcfg = "
-<IfModule mod_dav_fs.c>
-		DAVLockDB /var/lib/dav/lockdb
-</IfModule>
-<VirtualHost *:80>
-ServerAdmin webmaster@localhost
-DocumentRoot /var/www/html
-Alias /pxeboot /var/lib/tftpboot/data
-<Directory /var/lib/tftpboot/data>
-DAV On
-Options Indexes FollowSymLinks
-Require all granted
-</Directory>
-</VirtualHost>";
-$file1 = fopen("backup/pxeboot.conf", "a");
-fwrite($file1, $httpdcfg);
-fclose($file1);
+	if(intval($_COOKIE["pxetype"]) == "0") {
+	} else {
+	die('<body class="container">
+	<br><br><br>
+	<div class="mx-auto card">
+	<div class="card-body">
+	<b>Ana Yükleme İşlemi</b>
+	<hr></hr>
+	<code>iPXE : Soon</code><br>
+	<a type="button" href="install.php?git=install3" class="btn btn-dark">Kurulumu Bitir</a>
+	</div></div></body>');
+	}
+	$httpdcfg = "
+	<IfModule mod_dav_fs.c>
+	DAVLockDB /var/lib/dav/lockdb
+	</IfModule>
+	<VirtualHost *:80>
+	ServerAdmin webmaster@localhost
+	DocumentRoot /var/www/html
+	Alias /pxeboot /var/lib/tftpboot/data
+	<Directory /var/lib/tftpboot/data>
+	DAV On
+	Options Indexes FollowSymLinks
+	Require all granted
+	</Directory>
+	</VirtualHost>";
+	$file1 = fopen("backup/pxeboot.conf", "a");
+	fwrite($file1, $httpdcfg);
+	fclose($file1);
 
-$tftpconf = "
-service tftp
-{
+	if(intval($_COOKIE["pxetype"]) == "0") {
+	$tftpconf = "
+	service tftp
+	{
 	socket_type	= dgram
 	protocol	= udp
 	wait		= yes
@@ -592,31 +605,69 @@ service tftp
 	per_source	= 11
 	cps		= 100 2
 	flags		= IPv4
-}";
-$file2 = fopen("backup/tftp", "a");
-fwrite($file2, $tftpconf);
-fclose($file2);
+	}";
+	} else {
+	$tftpconf = "
+	service tftp
+	{
+	protocol        = udp
+	port            = 69
+	socket_type     = dgram
+	wait            = yes
+	user            = root
+	server          = /usr/sbin/in.tftpd
+	server_args     = -v -v -v -v -v --map-file /var/lib/tftpboot/map-file /var/lib/tftpboot
+	disable         = no
+	# This is a workaround for Fedora, where TFTP will listen only on
+	# IPv6 endpoint, if IPv4 flag is not used.
+	flags           = IPv4
+	}";
+	}
+	$file2 = fopen("backup/tftp", "a");
+	fwrite($file2, $tftpconf);
+	fclose($file2);
 
+	if(intval($_COOKIE["pxetype"]) == "0") {
+	$select = '#VBox Config
+	# DHCP on Virtualbox https://jpmens.net/2018/03/07/dhcp-in-virtualbox-hosts/
+	# Vbox Extension Pack : https://download.virtualbox.org/virtualbox/6.1.8/Oracle_VM_VirtualBox_Extension_Pack-6.1.8.vbox-extpack
+	# Enable DHCP Server
+	port=0
+	interface='.strip_tags($_POST["intname"]).'
+	# DHCP range-leases
+	dhcp-range='.strip_tags($_POST["serverlowrange"]).','.strip_tags($_POST["serverhighrange"]).','.strip_tags($_POST["servergateway"]).',12h
+	# DNS
+	dhcp-option=option:dns-server,'.strip_tags($_POST["serverip"]).'
 
-$select = '#VBox Config
-# DHCP on Virtualbox https://jpmens.net/2018/03/07/dhcp-in-virtualbox-hosts/
-# Vbox Extension Pack : https://download.virtualbox.org/virtualbox/6.1.8/Oracle_VM_VirtualBox_Extension_Pack-6.1.8.vbox-extpack
-# Enable DHCP Server
-port=0
-interface='.strip_tags($_POST["intname"]).'
-# DHCP range-leases
-dhcp-range='.strip_tags($_POST["serverlowrange"]).','.strip_tags($_POST["serverhighrange"]).','.strip_tags($_POST["servergateway"]).',12h
-# DNS
-dhcp-option=option:dns-server,'.strip_tags($_POST["serverip"]).'
-
-dhcp-boot=pxelinux.0
-pxe-service=x86PC, "PXE Boot Manager / By Ali Can Gonullu", pxelinux
-# Enable TFTP
-enable-tftp
-tftp-root=/var/lib/tftpboot';
-$file3 = fopen("backup/dnsmasq.conf", "a");
-fwrite($file3, $select);
-fclose($file3);
+	dhcp-boot=pxelinux.0
+	pxe-service=x86PC, "PXE Boot Manager / By Ali Can Gonullu", pxelinux
+	# Enable TFTP
+	enable-tftp
+	tftp-root=/var/lib/tftpboot';
+	} else {
+	$pxefile = "centos8.ipxe";
+	$com1 = "".dirname(__FILE__)."/pxe/".$pxefile."";
+	$select = '#VBox Config
+	# DHCP on Virtualbox https://jpmens.net/2018/03/07/dhcp-in-virtualbox-hosts/
+	# Vbox Extension Pack : https://download.virtualbox.org/virtualbox/6.1.8/Oracle_VM_VirtualBox_Extension_Pack-6.1.8.vbox-extpack
+	# Enable DHCP Server
+	port=0
+	interface='.strip_tags($_POST["intname"]).'
+	# DHCP range-leases
+	dhcp-range='.strip_tags($_POST["serverlowrange"]).','.strip_tags($_POST["serverhighrange"]).','.strip_tags($_POST["servergateway"]).',12h
+	# Enable TFTP
+	enable-tftp
+	tftp-root=/var/lib/tftpboot
+	# DNS
+	dhcp-option=option:dns-server,'.strip_tags($_POST["serverip"]).'
+	dhcp-userclass=set:ipxe,iPXE
+	dhcp-boot='.$com1.'
+	log-queries
+	log-dhcp';
+	}
+	$file3 = fopen("backup/dnsmasq.conf", "a");
+	fwrite($file3, $select);
+	fclose($file3);
 
 if(intval($_COOKIE["pxetype"]) == "0") {
 $default = "default menu.c32

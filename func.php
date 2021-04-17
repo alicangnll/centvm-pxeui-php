@@ -1030,17 +1030,8 @@ $.getJSON('netw.php?id=2', function(emp) {
 document.getElementById("uptime").innerHTML = emp.data;
 }); 
 }
-//Filename
-function filename(){
-$.getJSON('netw.php?id=6', function(emp) { 
-document.getElementById("filename").innerHTML = emp[0].file;
-}); 
-}
 
 $(document).ready(function() {
-$.getJSON('netw.php?id=6', function(emp) { 
-$('#filename').html('' + emp[0].file + ''); 
-}); 
 $.getJSON('netw.php?id=5', function(emp) { 
 $('#hddusage').html('' + emp.data + '%'); 
 }); 	
@@ -1061,7 +1052,6 @@ setInterval(function(){
 hddusage();
 cpu();
 freeram();
-filename();
 }, 2000);
 });
 jQuery(document).ready(function($){

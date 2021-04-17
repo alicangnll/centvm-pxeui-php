@@ -1,4 +1,12 @@
 <?php   
+include("conn.php");
+set_time_limit(0);
+if (file_exists("yukle.lock")) {
+} else {
+die("Yükleme yapılmamış (Eksik dosya : yukle.lock)<br><a href='install.php'>Yükle</a>");
+}
+$getir = new PXEBoot();
+$getir->logincheck($_COOKIE['admin_adi']);
 $durum = strip_tags($_GET["id"]);
 $int = strip_tags($_GET["crd"]);
 
@@ -42,6 +50,22 @@ $free = (string)trim($free);
 	$mem = array_merge($mem);
 	$memory_usage = $mem[2]/$mem[1]*100;
 echo '{"name":"freeram","data": "'.trim(intval($memory_usage)).'"}';
+} elseif(strip_tags($durum) == "4") { 
+function get_server_cpu_usage(){
+	$load = sys_getloadavg();
+	return intval($load[0]);
+}
+$cpumodelexec = shell_exec("cat /proc/cpuinfo | grep 'model name' | uniq");
+$cpumodel2 = str_replace("model", "", $cpumodelexec);
+$cpumodel3 = str_replace(":", "", $cpumodel2);
+$cpumodel = str_replace("name", "", $cpumodel3);
+echo '{"name":"cpuload","data": "'.trim(get_server_cpu_usage()).'","data2": "'.trim($cpumodel).'"}';
+} elseif(strip_tags($durum) == "5") { 
+$total = (disk_total_space("/")/1024);
+$available = (disk_free_space("/")/1024);
+$used = ($total - $available);
+$hdd_usage = intval($used/$total*100);
+echo '{"name":"hdd","data": "'.trim($hdd_usage).'"}';
 } else {
 }
 ?>

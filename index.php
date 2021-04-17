@@ -319,117 +319,98 @@ echo '<br><br><div class="container page">
 </div>';
 
 echo '<center><div class="container row mt-2">';
-$cpumodelexec = shell_exec("cat /proc/cpuinfo | grep 'model name' | uniq");
-$cpumodel2 = str_replace("model", "", $cpumodelexec);
-$cpumodel3 = str_replace(":", "", $cpumodel2);
-$cpumodel = str_replace("name", "", $cpumodel3);
-if ($load[0] > 80) {
-echo '<div class="container cell-md-4 mt-4">
-<div class="icon-box border bd-default">
-<div class="icon bg-red fg-white"><span class="mif-cog"></span></div>
-<div class="content p-4">
-<div class="text-upper">CPU Traffic</div>
-
-<small class="text-upper text-bold text-lead">'.$cpumodel.'</small>
-<div class="text-upper text-bold text-lead">'.get_server_cpu_usage().'</div>
-</div></div></div>';
-} elseif ($load[0] == 80) {
-echo '<div class="container cell-md-4 mt-4">
-<div class="icon-box border bd-default">
-<div class="icon bg-red fg-white"><span class="mif-cog"></span></div>
-<div class="content p-4">
-<div class="text-upper">CPU Traffic</div>
-<small class="text-upper text-bold text-lead">'.$cpumodel.'</small>
-<div class="text-upper text-bold text-lead">'.get_server_cpu_usage().'</div>
-</div></div></div>';
-} else {
-  echo '<div class="container cell-md-4 mt-4">
-<div class="icon-box border bd-default">
-<div class="icon bg-green fg-white"><span class="mif-cog"></span></div>
-<div class="content p-4">
-<div class="text-upper">CPU Traffic</div>
-
-<small class="text-upper text-bold text-lead">'.$cpumodel.'</small>
-<div class="text-upper text-bold text-lead">'.get_server_cpu_usage().'</div>
-</div></div></div>';
-}
-
 ?>
-<script>
-$(document).ready(function() { 
-$.getJSON('netw.php?id=3', function(emp2) { 
-$('#freeram').html('%' + emp2.data + ''); 
+<script charset="UTF-8">
+function cpu(){
+$.getJSON('netw.php?id=4', function(emp) { 
+document.getElementById("cpumodel").innerHTML = emp.data2;
+document.getElementById("cputrafic").innerHTML = emp.data;
 }); 
+}
+//FREERAM
+
+function freeram(){
+$.getJSON('netw.php?id=3', function(emp) { 
+document.getElementById("freeram").innerHTML = emp.data;
 }); 
-</script>
-<?php
-if($memus == $mem) {
-  echo '<div class="container cell-md-4 mt-4">
-<div class="icon-box border bd-default">
-<div class="icon bg-red fg-white"><span class="mif-codepen"></span></div>
-<div class="content p-4">
-<div class="text-upper">RAM Usage</div>
-<div class="text-upper text-bold text-lead"><font color="red" id="freeram"></font></div>
-</div></div></div>';
-} elseif($memus >= $mem) {
-  echo '<div class="container cell-md-4 mt-4">
-<div class="icon-box border bd-default">
-<div class="icon bg-red fg-white"><span class="mif-codepen"></span></div>
-<div class="content p-4">
-<div class="text-upper">RAM Usage</div>
-<div class="text-upper text-bold text-lead"><font color="red" id="freeram"></font></div>
-</div></div></div>';
-} else {
-  echo '<div class="container cell-md-4 mt-4">
-<div class="icon-box border bd-default">
-<div class="icon bg-green fg-white"><span class="mif-codepen"></span></div>
-<div class="content p-4">
-<div class="text-upper">RAM Usage</div>
-<div class="text-upper text-bold text-lead"><font color="green" id="freeram"></font></div>
-</div></div></div>';
 }
-if($used == disk_total_space("/")) {
-  echo '<div class="container cell-md-4 mt-4">
-  <div class="icon-box border bd-default">
-  <div class="icon bg-red fg-white"><span class="mif-drive"></span></div>
-  <div class="content p-4">
-  <div class="text-upper">HDD Capacity</div>
-  <div class="text-upper text-bold text-lead">font color="red">'.$hdd_usage.' %</font></div>
-  </div></div></div>';
-} elseif(disk_total_space("/") <= $used) {
-  echo '<div class="container cell-md-4 mt-4">
-  <div class="icon-box border bd-default">
-  <div class="icon bg-red fg-white"><span class="mif-drive"></span></div>
-  <div class="content p-4">
-  <div class="text-upper">HDD Capacity</div>
-  <div class="text-upper text-bold text-lead"><font color="red">'.$hdd_usage.' %</font></div>
-  </div></div></div>';
-} else {
-  echo '<div class="container cell-md-4 mt-4">
-  <div class="icon-box border bd-default">
-  <div class="icon bg-green fg-white"><span class="mif-drive"></span></div>
-  <div class="content p-4">
-  <div class="text-upper">HDD Capacity</div>
-  <div class="text-upper text-bold text-lead"><font color="green">'.$hdd_usage.' %</font></div>
-  </div></div></div>';
+//HDD Capacity 
+function hddusage(){
+$.getJSON('netw.php?id=5', function(emp) { 
+document.getElementById("hddusage").innerHTML = "" + emp.data + "%";
+}); 
 }
-?>
-<script>
-$(document).ready(function() { 
+//Uptime
+function uptime(){
+$.getJSON('netw.php?id=2', function(emp) { 
+document.getElementById("uptime").innerHTML = emp.data;
+}); 
+}
+
+$(document).ready(function() {
+$.getJSON('netw.php?id=5', function(emp) { 
+$('#hddusage').html('' + emp.data + '%'); 
+}); 	
+$.getJSON('netw.php?id=4', function(emp) { 
+$('#cputrafic').html('' + emp.data + ''); 
+$('#cpumodel').html('' + emp.data2 + ''); 
+}); 
+$.getJSON('netw.php?id=3', function(emp) { 
+$('#freeram').html('' + emp.data + ''); 
+}); 
 $.getJSON('netw.php?id=2', function(emp) { 
 $('#uptime').html('' + emp.data + ''); 
+});
 }); 
-}); 
+
+jQuery(document).ready(function($){
+setInterval(function(){
+hddusage();
+cpu();
+freeram();
+}, 2000);
+});
+jQuery(document).ready(function($){
+setInterval(function(){
+uptime();
+}, 60000);
+});
 </script>
+<?php
+echo '<div class="container cell-md-4 mt-4">
+<div class="icon-box border bd-default">
+<div class="icon bg-red fg-white"><span class="mif-cog"></span></div>
+<div class="content p-4">
+<div class="text-upper">CPU Traffic</div>
+
+<small class="text-upper text-bold text-lead" id="cpumodel"></small>
+<div class="text-upper text-bold text-lead" id="cputrafic"></div>
+</div></div></div>';
+
+echo '<div class="container cell-md-4 mt-4">
+<div class="icon-box border bd-default">
+<div class="icon bg-red fg-white"><span class="mif-codepen"></span></div>
+<div class="content p-4">
+<div class="text-upper">RAM Usage</div>
+<div class="text-upper text-bold text-lead" id="freeram"></div>
+</div></div></div>';
+
+echo '<div class="container cell-md-4 mt-4">
+<div class="icon-box border bd-default">
+<div class="icon bg-red fg-white"><span class="mif-drive"></span></div>
+<div class="content p-4">
+<div class="text-upper">HDD Capacity</div>
+<div class="text-upper text-bold text-lead" id="hddusage"></div>
+</div></div></div>
+
 <div class="container cell-md-13 mt-5">
 <div class="icon-box border bd-default">
 <div class="icon bg-red fg-white"><span class="mif-chart-line"></span></div>
 <div class="content p-4">
 <div class="text-upper">Uptime</div>
 <div class="text-upper text-bold text-lead" id="uptime"></div>
-</div></div></div>
+</div></div></div>';
 
-<?php
 $cp_start = "cp ".dirname(__FILE__)."/backup/centvm.service /etc/systemd/system/";
 $sysctl_start = "systemctl start centvm.service";
 $sysctl_enable = "systemctl enable centvm.service";

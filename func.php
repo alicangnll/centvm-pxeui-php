@@ -1346,6 +1346,7 @@ echo '<tr>
 	//<b> Windows NFS Server Connect : https://graspingtech.com/mount-nfs-share-windows-10/</b>
 	// <b> TFTP Server Connect FreeDOS : </b>
 	}
+	
 	function InstallThree($pwd) {
 	$httpd_chmod1 = "echo '".strip_tags($pwd)."' | sudo -S -k chmod -R 777 /var/lib/tftpboot/data";
 	$httpd_chown1 = "echo '".strip_tags($pwd)."' | sudo -S -k chown -R nobody:nobody /var/lib/tftpboot/data";
@@ -1375,6 +1376,34 @@ echo '<tr>
 	shell_exec($chcforce);
 	shell_exec($semanage);
 	shell_exec($restoreconforce);
+	
+	echo '<code>
+	'.$cp_default.'<br>
+	'.$default_chmod.'<br>
+	'.$httpd_cp.'<br>
+	'.$tftp_cp.'<br>
+	'.$dnsmasq_chmod.'<br>
+	'.$dnsmasq_cp.'<br>
+	'.$touch_nfserver.'<br>
+	'.$mkdir.'<br>
+	'.$mkdir2.'<br>
+	'.$firewall_stop.'<br>
+	'.$firewall_disable.'<br>
+	'.$syslinux_conf.'<br>
+	'.$httpd_chmod.'<br>
+	'.$httpd_chown.'<br>
+	'.$httpd_selinux1.'<br>
+	'.$httpd_selinux2.'<br>
+	'.$tftp_syslinux2.'<br>
+	'.$xinetd.'<br>
+	'.$xinetd_enab.'<br>
+	'.$dnsmasq.'<br>
+	'.$dnsmasq_enab.'<br>
+	'.$tftp.'<br>
+	'.$tftp_enab.'<br>
+	'.$nfsserver.'<br>
+	'.$httpserver.'<br>
+	</code><br>';
 	}
 	
 	function InstallOne($pwd) {
@@ -1402,6 +1431,19 @@ echo '<tr>
 	shell_exec($firewall6);
 	shell_exec($firewall7);
 	shell_exec($firewall8);
+	echo '<code>
+	'.$installer.'<br>
+	'.$mk_syslinuxfolder.'<br>
+	'.$copy_syslinux.'<br>
+	'.$firewall1.'<br>
+	'.$firewall2.'<br>
+	'.$firewall3.'<br>
+	'.$firewall4.'<br>
+	'.$firewall5.'<br>
+	'.$firewall6.'<br>
+	'.$firewall7.'<br>
+	'.$firewall8.'<br>
+	</code>';
 	}
 	
 	function CreateLock($data) {

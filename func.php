@@ -1137,21 +1137,36 @@ setTimeout(fetchData, 1000);
 </center>
 <?php
 }
-function Extension($data, $text) {
-if(!extension_loaded($data)){
-echo '<tr>
-<td>'.$text.'</td>
-<td><font color="red">No</font></td>
-</tr><br><br>';
-} else {
-echo '<tr>
-<td>'.$text.'</td>
-<td><font color="green">OK</font></td>
-</tr>';
-}
-}
+	function Extension($data, $text) {
+	if(!extension_loaded($data)){
+	echo '<tr>
+	<td>'.$text.'</td>
+	<td><font color="red">No</font></td>
+	</tr><br><br>';
+	} else {
+	echo '<tr>
+	<td>'.$text.'</td>
+	<td><font color="green">OK</font></td>
+	</tr>';
+	}
+	}
+	
+	function FunctionCont($data, $text) {
+	if(!function_exists($data)){
+	echo '<tr>
+	<td>'.$text.'</td>
+	<td><font color="red">No</font></td>
+	</tr><br><br>';
+	} else {
+	echo '<tr>
+	<td>'.$text.'</td>
+	<td><font color="green">OK</font></td>
+	</tr>';
+	}
+	}
 
-	function HttpdFile(){
+	function HttpdFile($data){
+	if(intval($data) == "0") {
 	$httpdcfg = "
 	<IfModule mod_dav_fs.c>
 	DAVLockDB /var/lib/dav/lockdb
@@ -1169,6 +1184,8 @@ echo '<tr>
 	$file1 = fopen("backup/pxeboot.conf", "a");
 	fwrite($file1, $httpdcfg);
 	fclose($file1);
+	} else {
+	}
 	}
 	
 	function TFTPFile($data) {
@@ -1252,8 +1269,8 @@ echo '<tr>
 	fclose($file3);
 	}
 	
-	function DefaultFile() {
-	if(intval($_COOKIE["pxetype"]) == "0") {
+	function DefaultFile($data) {
+	if(intval($data) == "0") {
 	$default = "default menu.c32
 	prompt 0
 	timeout 100
@@ -1276,174 +1293,6 @@ echo '<tr>
 	} else {
 		
 	}
-	}
-	
-	function InstallerTwo($pwd) {
-		
-	$cp_default = "echo '".strip_tags($pwd)."' | sudo -S -k cp ".dirname(__FILE__)."/backup/default /var/lib/tftpboot/pxelinux.cfg/";
-	$default_chmod = "echo '".strip_tags($pwd)."' | sudo -S -k chmod -R 777 /var/lib/tftpboot/pxelinux.cfg";
-	$mkdir = "echo '".strip_tags($pwd)."' | sudo -S -k mkdir /var/lib/tftpboot/data";
-	$mkdir2 = "echo '".strip_tags($pwd)."' | sudo -S -k mkdir /var/lib/tftpboot/data/iso";
-	$touch_nfserver = 'echo "/var/lib/tftpboot/data	*(rw)" >> /etc/exports';
-	
-	shell_exec($cp_default);
-	shell_exec($default_chmod);
-	shell_exec($mkdir);
-	shell_exec($mkdir2);
-	shell_exec($touch_nfserver);
-	//NFS SERVER : OK
-	$httpd_chmod = "echo '".strip_tags($pwd)."' | sudo -S -k chmod -R 777 /var/lib/tftpboot/data";
-	$httpd_chown = "echo '".strip_tags($pwd)."' | sudo -S -k chown -R nobody:nobody /var/lib/tftpboot/data";
-	$httpd_selinux1 = "echo '".strip_tags($pwd)."' | sudo -S -k chcon -R -t httpd_sys_rw_content_t /var/lib/tftpboot/data";
-	$httpd_selinux2 = "echo '".strip_tags($pwd)."' | sudo -S -k semanage fcontext -a -t httpd_sys_rw_content_t /var/lib/tftpboot/data";
-	$tftp_syslinux2 = "echo '".strip_tags($pwd)."' | sudo -S -k	/sbin/restorecon -R -v /var/lib/tftpboot";
-	//HTTPD : OK
-	// Perm Problem Solve :
-	// systemctl stop firewalld
-	// setenforce 0 && sed -i 's/SELINUX=enforcing/SELINUX=permissive/g' /etc/sysconfig/selinux
-	// chmod -R 777 /var/lib/tftpboot/data
-	// chown -R nobody:nobody /var/lib/tftpboot/data
-	// chcon -R -t httpd_sys_rw_content_t /var/lib/tftpboot/data
-	// semanage fcontext -a -t httpd_sys_rw_content_t /var/lib/tftpboot/data
-	// /sbin/restorecon -R -v /var/lib/tftpboot
-	$firewall_stop = "echo '".strip_tags($pwd)."' | sudo -S -k systemctl stop firewalld";
-	$firewall_disable = "echo '".strip_tags($pwd)."' | sudo -S -k systemctl disable firewalld";
-	$syslinux_conf = "echo '".strip_tags($pwd)."' | sudo -S -k setenforce 0 && sed -i 's/SELINUX=enforcing/SELINUX=permissive/g' /etc/sysconfig/selinux";
-	
-	shell_exec($firewall_stop);
-	shell_exec($firewall_disable);
-	shell_exec($syslinux_conf);
-	
-	//SYSLİNUX : OK
-	$httpd_cp = "echo '".strip_tags($pwd)."' | sudo -S -k cp ".dirname(__FILE__)."/backup/pxeboot.conf /etc/httpd/conf.d/";
-	$tftp_cp = "echo '".strip_tags($pwd)."' | sudo -S -k cp ".dirname(__FILE__)."/backup/tftp /etc/xinetd.d/";
-	$dnsmasq_chmod = "echo '".strip_tags($pwd)."' | sudo -S -k chmod 777 /etc/dnsmasq.conf";
-	$dnsmasq_cp = "echo '".strip_tags($pwd)."' | sudo -S -k cp ".dirname(__FILE__)."/backup/dnsmasq.conf /etc/";
-	
-	shell_exec($httpd_cp);
-	shell_exec($tftp_cp);
-	shell_exec($dnsmasq_chmod);
-	shell_exec($dnsmasq_cp);
-	
-	$xinetd = "echo '".strip_tags($pwd)."' | sudo -S -k systemctl start xinetd";
-	$xinetd_enab = "echo '".strip_tags($pwd)."' | sudo -S -k systemctl enable xinetd";
-	$dnsmasq = "echo '".strip_tags($pwd)."' | sudo -S -k systemctl restart dnsmasq";
-	$dnsmasq_enab = "echo '".strip_tags($pwd)."' | sudo -S -k systemctl enable dnsmasq";
-	$tftp = "echo '".strip_tags($pwd)."' | sudo -S -k systemctl restart tftp";
-	$tftp_enab = "echo '".strip_tags($pwd)."' | sudo -S -k systemctl enable tftp";
-	$nfsserver = "echo '".strip_tags($pwd)."' | sudo -S -k systemctl start nfs-server";
-	$httpserver = "echo '".strip_tags($pwd)."' | sudo -S -k systemctl restart httpd";
-	
-	shell_exec($xinetd);
-	shell_exec($xinetd_enab);
-	shell_exec($dnsmasq);
-	shell_exec($dnsmasq_enab);
-	shell_exec($tftp);
-	shell_exec($tftp_enab);
-	shell_exec($nfsserver);
-	shell_exec($httpserver);
-	//<b> Windows Server NFS Server Connect : https://www.rootusers.com/how-to-mount-an-nfs-share-in-windows-server-2016/</b>
-	//<b> Windows NFS Server Connect : https://graspingtech.com/mount-nfs-share-windows-10/</b>
-	// <b> TFTP Server Connect FreeDOS : </b>
-	}
-	
-	function InstallThree($pwd) {
-	$httpd_chmod1 = "echo '".strip_tags($pwd)."' | sudo -S -k chmod -R 777 /var/lib/tftpboot/data";
-	$httpd_chown1 = "echo '".strip_tags($pwd)."' | sudo -S -k chown -R nobody:nobody /var/lib/tftpboot/data";
-	$httpd_selinux11 = "echo '".strip_tags($pwd)."' | sudo -S -k chcon -R -t httpd_sys_rw_content_t /var/lib/tftpboot/data";
-	$httpd_selinux21 = "echo '".strip_tags($pwd)."' | sudo -S -k semanage fcontext -a -t httpd_sys_rw_content_t /var/lib/tftpboot/data";
-	$tftp_syslinux21 = "echo '".strip_tags($pwd)."' | sudo -S -k /sbin/restorecon -R -v /var/lib/tftpboot";
-	shell_exec($httpd_chmod1);
-	shell_exec($httpd_chown1);
-	shell_exec($httpd_selinux11);
-	shell_exec($httpd_selinux21);
-	shell_exec($tftp_syslinux21);
-
-	$stop_firewall = "systemctl stop firewalld";
-	$disable_firewall = "systemctl disable firewalld";
-	$enforce = "setenforce 0 && sed -i 's/SELINUX=enforcing/SELINUX=permissive/g' /etc/sysconfig/selinux";
-	$chforce = "chmod -R 777 /var/www/html";
-	$choforce = "chown -R nobody:nobody /var/www/html";
-	$chcforce = "chcon -R -t httpd_sys_rw_content_t /var/www/html";
-	$semanage = "semanage fcontext -a -t httpd_sys_rw_content_t /var/www/html";
-	$restoreconforce = "/sbin/restorecon -R -v /var/www/html";
-
-	shell_exec($stop_firewall);
-	shell_exec($disable_firewall);
-	shell_exec($enforce);
-	shell_exec($chforce);
-	shell_exec($choforce);
-	shell_exec($chcforce);
-	shell_exec($semanage);
-	shell_exec($restoreconforce);
-	
-	echo '<code>
-	'.$cp_default.'<br>
-	'.$default_chmod.'<br>
-	'.$httpd_cp.'<br>
-	'.$tftp_cp.'<br>
-	'.$dnsmasq_chmod.'<br>
-	'.$dnsmasq_cp.'<br>
-	'.$touch_nfserver.'<br>
-	'.$mkdir.'<br>
-	'.$mkdir2.'<br>
-	'.$firewall_stop.'<br>
-	'.$firewall_disable.'<br>
-	'.$syslinux_conf.'<br>
-	'.$httpd_chmod.'<br>
-	'.$httpd_chown.'<br>
-	'.$httpd_selinux1.'<br>
-	'.$httpd_selinux2.'<br>
-	'.$tftp_syslinux2.'<br>
-	'.$xinetd.'<br>
-	'.$xinetd_enab.'<br>
-	'.$dnsmasq.'<br>
-	'.$dnsmasq_enab.'<br>
-	'.$tftp.'<br>
-	'.$tftp_enab.'<br>
-	'.$nfsserver.'<br>
-	'.$httpserver.'<br>
-	</code><br>';
-	}
-	
-	function InstallOne($pwd) {
-	//SYSLİNUX : OK
-	$firewall1 = "echo '".strip_tags($pwd)."' | sudo -S -k firewall-cmd --add-service=http --zone=public --permanent";
-	$firewall2 = "echo '".strip_tags($pwd)."' | sudo -S -k firewall-cmd --add-service=tftp --zone=public --permanent";
-	$firewall3 = "echo '".strip_tags($pwd)."' | sudo -S -k firewall-cmd --add-service=dhcp --zone=public --permanent";
-	$firewall4 = "echo '".strip_tags($pwd)."' | sudo -S -k firewall-cmd --add-service=dns --zone=public --permanent";
-	$firewall5 = "echo '".strip_tags($pwd)."' | sudo -S -k firewall-cmd --add-service=ftp --zone=public --permanent";
-	$firewall6 = "echo '".strip_tags($pwd)."' | sudo -S -k firewall-cmd --zone=public --permanent --add-port=69/udp";
-	$firewall7 = "echo '".strip_tags($pwd)."' | sudo -S -k firewall-cmd --zone=public --permanent --add-port=4011/udp";
-	$firewall8 = "echo '".strip_tags($pwd)."' | sudo -S -k firewall-cmd --reload";
-	
-	$installer = "echo '".strip_tags($pwd)."' | sudo -S -k yum install -y epel-release tftp tftp-server xinetd syslinux net-tools dnsmasq zip nfs-utils tar wget policycoreutils-python-utils libguestfs-tools bind-utils";
-	$mk_syslinuxfolder = "echo '".strip_tags($pwd)."' | sudo -S -k mkdir /var/lib/tftpboot/pxelinux.cfg";
-	$copy_syslinux = "echo '".strip_tags($pwd)."' | sudo -S -k cp -v /usr/share/syslinux/* /var/lib/tftpboot";
-	shell_exec($installer);
-	shell_exec($mk_syslinuxfolder);
-	shell_exec($copy_syslinux);
-	shell_exec($firewall1);
-	shell_exec($firewall2);
-	shell_exec($firewall3);
-	shell_exec($firewall4);
-	shell_exec($firewall5);
-	shell_exec($firewall6);
-	shell_exec($firewall7);
-	shell_exec($firewall8);
-	echo '<code>
-	'.$installer.'<br>
-	'.$mk_syslinuxfolder.'<br>
-	'.$copy_syslinux.'<br>
-	'.$firewall1.'<br>
-	'.$firewall2.'<br>
-	'.$firewall3.'<br>
-	'.$firewall4.'<br>
-	'.$firewall5.'<br>
-	'.$firewall6.'<br>
-	'.$firewall7.'<br>
-	'.$firewall8.'<br>
-	</code>';
 	}
 	
 	function CreateLock($data) {
@@ -1494,6 +1343,52 @@ echo '<tr>
 	
 	function DeleteCookie($name) {
 	echo '	<script>document.cookie = "'.$name.'= ; expires = Thu, 01 Jan 1970 00:00:00 GMT";</script>';
+	}
+	
+	function LicenseCommands() {
+	$httpd_chmod1 = "echo '".strip_tags($_COOKIE["rootpwd"])."' | sudo -S -k chmod -R 777 /var/lib/tftpboot/data";
+	$httpd_chown1 = "echo '".strip_tags($_COOKIE["rootpwd"])."' | sudo -S -k chown -R nobody:nobody /var/lib/tftpboot/data";
+	$httpd_selinux11 = "echo '".strip_tags($_COOKIE["rootpwd"])."' | sudo -S -k chcon -R -t httpd_sys_rw_content_t /var/lib/tftpboot/data";
+	$httpd_selinux21 = "echo '".strip_tags($_COOKIE["rootpwd"])."' | sudo -S -k semanage fcontext -a -t httpd_sys_rw_content_t /var/lib/tftpboot/data";
+	$tftp_syslinux21 = "echo '".strip_tags($_COOKIE["rootpwd"])."' | sudo -S -k	/sbin/restorecon -R -v /var/lib/tftpboot";
+	shell_exec($httpd_chmod1);
+	shell_exec($httpd_chown1);
+	shell_exec($httpd_selinux11);
+	shell_exec($httpd_selinux21);
+	shell_exec($tftp_syslinux21);
+
+	$stop_firewall = "systemctl stop firewalld";
+	$disable_firewall = "systemctl disable firewalld";
+	$enforce = "setenforce 0 && sed -i 's/SELINUX=enforcing/SELINUX=permissive/g' /etc/sysconfig/selinux";
+	$chforce = "chmod -R 777 /var/www/html";
+	$choforce = "chown -R nobody:nobody /var/www/html";
+	$chcforce = "chcon -R -t httpd_sys_rw_content_t /var/www/html";
+	$semanage = "semanage fcontext -a -t httpd_sys_rw_content_t /var/www/html";
+	$restoreconforce = "/sbin/restorecon -R -v /var/www/html";
+
+	shell_exec($stop_firewall);
+	shell_exec($disable_firewall);
+	shell_exec($enforce);
+	shell_exec($chforce);
+	shell_exec($choforce);
+	shell_exec($chcforce);
+	shell_exec($semanage);
+	shell_exec($restoreconforce);
+	}
+	
+	function ContError($file, $title) {
+	if(empty($file)) {
+	die('<div class="mx-auto card">
+	<div class="card-body">
+	<b>Doğrulama Yapılamadı</b>
+	<hr>
+	<code>'.$title.'</code><br>
+	<div class="form-group">
+	<br><br><a href="install.php?git=license" class="btn btn-dark">Yenile / Refresh<br>
+	</a></div></div></div>');
+	} else {
+	setcookie($file, strip_tags($file), time()+3600);
+	}
 	}
 }
 ?>

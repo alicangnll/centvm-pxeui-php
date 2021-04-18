@@ -63,6 +63,12 @@ echo '{"name":"hdd","data": "'.trim($hdd_usage).'"}';
 $dir = "/var/lib/tftpboot/data/iso";
 $scanned_directory = array_diff(scandir($dir), array('..', '.'));
 echo '{"name":"filename","data": ""}';
+} elseif(strip_tags($durum) == "7") {
+$netw = shell_exec('ls /sys/class/net');
+$oparray = preg_split("#[\r\n]+#", $netw);
+$array = array();
+$json = json_decode($oparray);
+echo $json;
 } else {
 }
 ?>

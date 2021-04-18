@@ -1,8 +1,8 @@
 <?php
-include("func.php");
-$getir = new PXEBoot();
-$verify = "https://alicangonullu.info/lisans";
-if(file_exists("yukle.lock")) {
+	include("func.php");
+	$getir = new PXEBoot();
+	$verify = "https://alicangonullu.info/lisans";
+	if(file_exists("yukle.lock")) {
 	die('<div class="container mx-auto mt-5 card">
 	<div class="card-body">
 	<b>Yukle.Lock / File Found</b>
@@ -65,15 +65,13 @@ if(file_exists("yukle.lock")) {
 	<br><br>
 	<a type="button" href="install.php?git=first_install" class="btn btn-dark">Devam Et</a>
 	</div>
-	</div></body>
-	<script>
-	document.cookie = "rootpwd= ; expires = Thu, 01 Jan 1970 00:00:00 GMT";
-	document.cookie = "netwdrv= ; expires = Thu, 01 Jan 1970 00:00:00 GMT";
-	document.cookie = "lang= ; expires = Thu, 01 Jan 1970 00:00:00 GMT";
-	document.cookie = "user_id= ; expires = Thu, 01 Jan 1970 00:00:00 GMT";
-	document.cookie = "admin_adi= ; expires = Thu, 01 Jan 1970 00:00:00 GMT";
-	document.cookie = "pxetype= ; expires = Thu, 01 Jan 1970 00:00:00 GMT";
-	</script>';
+	</div></body>';
+	$getir->DeleteCookie("rootpwd");
+	$getir->DeleteCookie("netwdrv");
+	$getir->DeleteCookie("lang");
+	$getir->DeleteCookie("user_id");
+	$getir->DeleteCookie("admin_adi");
+	$getir->DeleteCookie("pxetype");
 	break;
 
 	case 'first_install':
@@ -102,7 +100,7 @@ if(file_exists("yukle.lock")) {
 	<tbody>';
 
 	$getir->Extension("pdo_mysql", "PDO MySQL");
-	$getir->Extension("shell_exec", "Shell EXEC");
+	$getir->FunctionCont("shell_exec", "Shell EXEC");
 	
 	echo '</tbody></table>
 	<form action="install.php?git=license" method="post">
@@ -127,85 +125,11 @@ if(file_exists("yukle.lock")) {
 	break;
 
 	case 'license':
-	$httpd_chmod1 = "echo '".strip_tags($_COOKIE["rootpwd"])."' | sudo -S -k chmod -R 777 /var/lib/tftpboot/data";
-	$httpd_chown1 = "echo '".strip_tags($_COOKIE["rootpwd"])."' | sudo -S -k chown -R nobody:nobody /var/lib/tftpboot/data";
-	$httpd_selinux11 = "echo '".strip_tags($_COOKIE["rootpwd"])."' | sudo -S -k chcon -R -t httpd_sys_rw_content_t /var/lib/tftpboot/data";
-	$httpd_selinux21 = "echo '".strip_tags($_COOKIE["rootpwd"])."' | sudo -S -k semanage fcontext -a -t httpd_sys_rw_content_t /var/lib/tftpboot/data";
-	$tftp_syslinux21 = "echo '".strip_tags($_COOKIE["rootpwd"])."' | sudo -S -k	/sbin/restorecon -R -v /var/lib/tftpboot";
-	shell_exec($httpd_chmod1);
-	shell_exec($httpd_chown1);
-	shell_exec($httpd_selinux11);
-	shell_exec($httpd_selinux21);
-	shell_exec($tftp_syslinux21);
-
-	$stop_firewall = "systemctl stop firewalld";
-	$disable_firewall = "systemctl disable firewalld";
-	$enforce = "setenforce 0 && sed -i 's/SELINUX=enforcing/SELINUX=permissive/g' /etc/sysconfig/selinux";
-	$chforce = "chmod -R 777 /var/www/html";
-	$choforce = "chown -R nobody:nobody /var/www/html";
-	$chcforce = "chcon -R -t httpd_sys_rw_content_t /var/www/html";
-	$semanage = "semanage fcontext -a -t httpd_sys_rw_content_t /var/www/html";
-	$restoreconforce = "/sbin/restorecon -R -v /var/www/html";
-
-	shell_exec($stop_firewall);
-	shell_exec($disable_firewall);
-	shell_exec($enforce);
-	shell_exec($chforce);
-	shell_exec($choforce);
-	shell_exec($chcforce);
-	shell_exec($semanage);
-	shell_exec($restoreconforce);
-
-	if(file_exists("update.json")) {
-	unlink("update.json");
-	$txt = "";
-	$fp = fopen("update.json","a");
-	fwrite($fp,$txt);
-	fclose($fp);
-	} else {
-	$txt = "";
-	$fp = fopen("update.json","a");
-	fwrite($fp,$txt);
-	fclose($fp);
-	}
-	if(empty($_POST["rootpwd"])) {
-	die('<div class="mx-auto card">
-	<div class="card-body">
-	<b>Doğrulama Yapılamadı</b>
-	<hr>
-	<code>Root Password Not Found</code><br>
-	<div class="form-group">
-	<br><br><a href="install.php?git=license" class="btn btn-dark">Yenile / Refresh<br>
-	</a></div></div></div>');
-	} else {
-	setcookie("rootpwd", strip_tags($_POST["rootpwd"]), time()+3600);
-	}
-	
-	if(empty($_POST["netwdrv"])) {
-	die('<div class="mx-auto card">
-	<div class="card-body">
-	<b>Doğrulama Yapılamadı</b>
-	<hr>
-	<code>Network Driver Not Found</code><br>
-	<div class="form-group">
-	<br><br><a href="install.php?git=license" class="btn btn-dark">Yenile / Refresh<br>
-	</a></div></div></div>');
-	} else {
-	setcookie("netwdrv", strip_tags($_POST["netwdrv"]), time()+3600);
-	}
-	
-	if(empty($_POST["lang"])) {
-	die('<div class="mx-auto card">
-	<div class="card-body">
-	<b>Doğrulama Yapılamadı</b>
-	<hr>
-	<code>Language Not Found</code><br>
-	<div class="form-group">
-	<br><br><a href="install.php?git=license" class="btn btn-dark">Yenile / Refresh<br>
-	</a></div></div></div>');
-	} else {
-	setcookie("lang", strip_tags($_POST["lang"]), time()+3600);
-	}
+	$getir->LicenseCommands();
+	$getir->FileControl("update.json");
+	$getir->ContError($_POST["rootpwd"], "Root Password Not Found");
+	$getir->ContError($_POST["netwdrv"], "Network Driver Not Found");
+	$getir->ContError($_POST["lang"], "Language Not Found");
 	
 	$ds = shell_exec('udevadm info --query=all --name=/dev/sda | grep ID_SERIAL_SHORT');
 	$serialx = explode("=", $ds);
@@ -213,6 +137,7 @@ if(file_exists("yukle.lock")) {
 	$systemuid = shell_exec("dmidecode -s system-uuid");
 	$data = '{"version_name": "Cygen","version": "11","lang" : "'.strip_tags($_POST["lang"]).'", "netw": "'.strip_tags($_POST["netwdrv"]).'"}';
 	$file3 = fopen("update.json", "a");
+	
 	fwrite($file3, $data);
 	fclose($file3);
 	$url = "".$verify."/keycontrol.php?cre=2&uuid=".md5($serial)."";
@@ -221,7 +146,6 @@ if(file_exists("yukle.lock")) {
 	curl_setopt($ch, CURLOPT_URL, $url);
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 	curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
-
 	curl_setopt($ch, CURLOPT_ENCODING, 'gzip, deflate');
 
 	$headers = array();
@@ -518,158 +442,15 @@ if(file_exists("yukle.lock")) {
 	break;
 
 	case 'pinstall2':
-	if (file_exists("backup/dnsmasq.conf")) {
-	unlink("backup/dnsmasq.conf");
-	touch("backup/dnsmasq.conf");
-	} else {
-	touch("backup/dnsmasq.conf");
-	}
-	if (file_exists("backup/tftp")) {
-	unlink("backup/tftp");
-	touch("backup/tftp");
-	} else {
-	touch("backup/tftp");
-	}
-	if (file_exists("backup/pxeboot.conf")) {
-	unlink("backup/pxeboot.conf");
-	touch("backup/pxeboot.conf");
-	} else {
-	touch("backup/pxeboot.conf");
-	}
-	if (file_exists("backup/default")) {
-	unlink("backup/default");
-	touch("backup/default");
-	} else {
-	touch("backup/default");
-	}
-	if(intval($_COOKIE["pxetype"]) == "0") {
-	} else {
-	die('<body class="container">
-	<br><br><br>
-	<div class="mx-auto card">
-	<div class="card-body">
-	<b>Ana Yükleme İşlemi</b>
-	<hr></hr>
-	<code>iPXE : Soon</code><br>
-	<a type="button" href="install.php?git=install3" class="btn btn-dark">Kurulumu Bitir</a>
-	</div></div></body>');
-	}
-	$httpdcfg = "
-	<IfModule mod_dav_fs.c>
-	DAVLockDB /var/lib/dav/lockdb
-	</IfModule>
-	<VirtualHost *:80>
-	ServerAdmin webmaster@localhost
-	DocumentRoot /var/www/html
-	Alias /pxeboot /var/lib/tftpboot/data
-	<Directory /var/lib/tftpboot/data>
-	DAV On
-	Options Indexes FollowSymLinks
-	Require all granted
-	</Directory>
-	</VirtualHost>";
-	$file1 = fopen("backup/pxeboot.conf", "a");
-	fwrite($file1, $httpdcfg);
-	fclose($file1);
-
-	if(intval($_COOKIE["pxetype"]) == "0") {
-	$tftpconf = "
-	service tftp
-	{
-	socket_type	= dgram
-	protocol	= udp
-	wait		= yes
-	user		= root
-	server		= /usr/sbin/in.tftpd
-	server_args	= -c /var/lib/tftpboot
-	disable		= no
-	per_source	= 11
-	cps		= 100 2
-	flags		= IPv4
-	}";
-	} else {
-	$tftpconf = "
-	service tftp
-	{
-	protocol        = udp
-	port            = 69
-	socket_type     = dgram
-	wait            = yes
-	user            = root
-	server          = /usr/sbin/in.tftpd
-	server_args     = -v -v -v -v -v --map-file /var/lib/tftpboot/map-file /var/lib/tftpboot
-	disable         = no
-	# This is a workaround for Fedora, where TFTP will listen only on
-	# IPv6 endpoint, if IPv4 flag is not used.
-	flags           = IPv4
-	}";
-	}
-	$file2 = fopen("backup/tftp", "a");
-	fwrite($file2, $tftpconf);
-	fclose($file2);
-
-	if(intval($_COOKIE["pxetype"]) == "0") {
-	$select = '#VBox Config
-	# DHCP on Virtualbox https://jpmens.net/2018/03/07/dhcp-in-virtualbox-hosts/
-	# Vbox Extension Pack : https://download.virtualbox.org/virtualbox/6.1.8/Oracle_VM_VirtualBox_Extension_Pack-6.1.8.vbox-extpack
-	# Enable DHCP Server
-	port=0
-	interface='.strip_tags($_POST["intname"]).'
-	# DHCP range-leases
-	dhcp-range='.strip_tags($_POST["serverlowrange"]).','.strip_tags($_POST["serverhighrange"]).','.strip_tags($_POST["servergateway"]).',12h
-	# DNS
-	dhcp-option=option:dns-server,'.strip_tags($_POST["serverip"]).'
-
-	dhcp-boot=pxelinux.0
-	pxe-service=x86PC, "PXE Boot Manager / By Ali Can Gonullu", pxelinux
-	# Enable TFTP
-	enable-tftp
-	tftp-root=/var/lib/tftpboot';
-	} else {
-	$pxefile = "centos8.ipxe";
-	$com1 = "".dirname(__FILE__)."/pxe/".$pxefile."";
-	$select = '#VBox Config
-	# DHCP on Virtualbox https://jpmens.net/2018/03/07/dhcp-in-virtualbox-hosts/
-	# Vbox Extension Pack : https://download.virtualbox.org/virtualbox/6.1.8/Oracle_VM_VirtualBox_Extension_Pack-6.1.8.vbox-extpack
-	# Enable DHCP Server
-	port=0
-	interface='.strip_tags($_POST["intname"]).'
-	# DHCP range-leases
-	dhcp-range='.strip_tags($_POST["serverlowrange"]).','.strip_tags($_POST["serverhighrange"]).','.strip_tags($_POST["servergateway"]).',12h
-	# Enable TFTP
-	enable-tftp
-	tftp-root=/var/lib/tftpboot
-	# DNS
-	dhcp-option=option:dns-server,'.strip_tags($_POST["serverip"]).'
-	dhcp-userclass=set:ipxe,iPXE
-	dhcp-boot='.$com1.'
-	log-queries
-	log-dhcp';
-	}
-	$file3 = fopen("backup/dnsmasq.conf", "a");
-	fwrite($file3, $select);
-	fclose($file3);
-
-	if(intval($_COOKIE["pxetype"]) == "0") {
-	$default = "default menu.c32
-	prompt 0
-	timeout 100
-
-	# Local Hard Disk pxelinux.cfg default entry
-	menu title PXE Boot Menu By Ali Can
-	LABEL 1
-	MENU LABEL Boot local hard drive
-	MENU AUTOBOOT
-	MENU DEFAULT
-	LOCALBOOT 0";
+	$getir->FileControl("backup/dnsmasq.conf");
+	$getir->FileControl("backup/tftp");
+	$getir->FileControl("backup/pxeboot.conf");
+	$getir->FileControl("backup/default");
+	$getir->HttpdFile($_COOKIE["pxetype"]);
+	$getir->TFTPFile($_COOKIE["pxetype"]);
+	$getir->DefaultFile($_COOKIE["pxetype"]);
 	
-	$file4 = fopen("backup/default", "a");
-	fwrite($file4, $default);
-	fclose($file4);
-	
-	$fp = fopen("/var/lib/tftpboot/pxelinux.cfg/default","wb");
-	fwrite($fp,$default);
-	fclose($fp);
+	if(intval($_COOKIE["pxetype"]) == "0") {
 	$cp_default = "echo '".strip_tags($_COOKIE["rootpwd"])."' | sudo -S -k cp ".dirname(__FILE__)."/backup/default /var/lib/tftpboot/pxelinux.cfg/";
 	$default_chmod = "echo '".strip_tags($_COOKIE["rootpwd"])."' | sudo -S -k chmod -R 777 /var/lib/tftpboot/pxelinux.cfg";
 	$mkdir = "echo '".strip_tags($_COOKIE["rootpwd"])."' | sudo -S -k mkdir /var/lib/tftpboot/data";
@@ -777,9 +558,9 @@ if(file_exists("yukle.lock")) {
 	<a type="button" href="install.php?git=install3" class="btn btn-dark">Kurulumu Bitir</a>
 	</div></div></body>');
 	}
-break;
+	break;
 
-case 'install3':
+	case 'install3':
 	if(file_exists("yukle.lock")) {
 	unlink("yukle.lock");
 	} else {
@@ -799,15 +580,13 @@ case 'install3':
 	<p>Yükleme Tamamlandı. Artık Server hazır durumdadır.</p>
 	<a type="button" href="index.php" class="btn btn-dark">Devam Et</a>
 	<br>
-	</body>
-	<script>
-	document.cookie = "rootpwd= ; expires = Thu, 01 Jan 1970 00:00:00 GMT";
-	document.cookie = "netwdrv= ; expires = Thu, 01 Jan 1970 00:00:00 GMT";
-	document.cookie = "lang= ; expires = Thu, 01 Jan 1970 00:00:00 GMT";
-	document.cookie = "user_id= ; expires = Thu, 01 Jan 1970 00:00:00 GMT";
-	document.cookie = "admin_adi= ; expires = Thu, 01 Jan 1970 00:00:00 GMT";
-	document.cookie = "pxetype= ; expires = Thu, 01 Jan 1970 00:00:00 GMT";
-	</script>';
-break;
-}
+	</body>';
+	$getir->DeleteCookie("rootpwd");
+	$getir->DeleteCookie("netwdrv");
+	$getir->DeleteCookie("lang");
+	$getir->DeleteCookie("user_id");
+	$getir->DeleteCookie("admin_adi");
+	$getir->DeleteCookie("pxetype");
+	break;
+	}
 ?>

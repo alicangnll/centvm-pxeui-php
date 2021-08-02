@@ -617,7 +617,9 @@ $getir->Error("Label ID birden küçük olmamalı");
 
 if($_POST['type'] == "vhd") {
 $create = "mkdir /var/lib/tftpboot/data/iso/".strip_tags($_FILES['dosya']['name'])."";
+shell_exec($create);
 $vhdext = "guestmount --add /var/lib/tftpboot/data/iso/".strip_tags($_POST["labelisoname"]).".vhd --inspector --ro /var/lib/tftpboot/data/iso/".strip_tags($_POST["labelisoname"])."";
+shell_exec($vhdext);
 $data = 'data/iso/'.strip_tags($_POST["labelisoname"]).'';
 } elseif($_POST['type'] == "iso") {
 $data = 'data/iso/'.strip_tags($_POST["labelisoname"]).'';
@@ -626,9 +628,29 @@ $data = 'data/iso/notfound.img';
 }
 
 if(intval($_POST["delete"]) == "1") {
-$txt = 'default menu.c32
+$txt = 'default vesamenu.c32
 prompt 0
 timeout 100
+
+MENU COLOR screen      0  #80ffffff #00000000 std      # background colour not covered by the splash image
+MENU COLOR border      0  #ffffffff #ee000000 std      # The wire-frame border
+MENU COLOR title       0  #ffff3f7f #ee000000 std      # Menu title text
+MENU COLOR sel         0  #ff00dfdf #ee000000 std      # Selected menu option
+MENU COLOR hotsel      0  #ff7f7fff #ee000000 std      # The selected hotkey (set with ^ in MENU LABEL)
+MENU COLOR unsel       0  #ffffffff #ee000000 std      # Unselected menu options
+MENU COLOR hotkey      0  #ff7f7fff #ee000000 std      # Unselected hotkeys (set with ^ in MENU LABEL)
+MENU COLOR tabmsg      0  #c07f7fff #00000000 std      # Tab text
+MENU COLOR timeout_msg 0  #8000dfdf #00000000 std      # Timout text
+MENU COLOR timeout     0  #c0ff3f7f #00000000 std      # Timout counter
+MENU COLOR disabled    0  #807f7f7f #ee000000 std      # Disabled menu options, including SEPARATORs
+MENU COLOR cmdmark     0  #c000ffff #ee000000 std      # Command line marker - The on the left when editing an option
+MENU COLOR cmdline     0  #c0ffffff #ee000000 std      # Command line - The text being edited
+# Options below havent been tested, descriptions may be lacking.
+MENU COLOR scrollbar   0  #40000000 #00000000 std      # Scroll bar
+MENU COLOR pwdborder   0  #80ffffff #20ffffff std      # Password box wire-frame border
+MENU COLOR pwdheader   0  #80ff8080 #20ffffff std      # Password box header
+MENU COLOR pwdentry    0  #80ffffff #20ffffff std      # Password entry field
+MENU COLOR help        0  #c0ffffff #00000000 std      # Help text, if set via TEXT HELP ... ENDTEXT
 
 # Local Hard Disk pxelinux.cfg default entry
 menu title PXE Boot Menu By Ali Can
@@ -638,12 +660,17 @@ MENU AUTOBOOT
 MENU DEFAULT
 LOCALBOOT 0
 
+
 LABEL '.intval($_POST["labelid"]).'
 MENU LABEL '.strip_tags($_POST["labelname"]).'
 kernel memdisk
 initrd '.strip_tags($data).'
 '.strip_tags($_POST["speconf"]).' 
-'.strip_tags($_POST["othercfg"]).'';
+'.strip_tags($_POST["othercfg"]).'
+
+LABEL memtest
+MENU LABEL Run Memtest86+
+LINUX /images/arch/memtest';
 
 $shell = shell_exec("rm -rf /var/lib/tftpboot/pxelinux.cfg/default");
 $update = $db->prepare("INSERT INTO boot_menu(boot_name, boot_isoname, boot_speconf, boot_othercfg, boot_date, boot_labelid) VALUES (:bootname, :isoname, :speconf, :othercfg, :tarih, :labelid) ");

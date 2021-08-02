@@ -18,6 +18,10 @@ $veri = trim($veri);
 return $veri; 
 }
 
+function KomutGir($installer) {
+$data = shell_exec($installer);
+return $data;
+}
 function Repair() {
 $cp_start = "cp ".dirname(__FILE__)."/backup/centvm.service /etc/systemd/system/";
 $sysctl_start = "systemctl start centvm.service";
@@ -1165,7 +1169,7 @@ setTimeout(fetchData, 1000);
 	}
 	}
 
-	function HttpdFile($data){
+	function HttpdFile($data, $file){
 	if(intval($data) == "0") {
 	$httpdcfg = "
 	<IfModule mod_dav_fs.c>
@@ -1174,8 +1178,8 @@ setTimeout(fetchData, 1000);
 	<VirtualHost *:80>
 	ServerAdmin webmaster@localhost
 	DocumentRoot /var/www/html
-	Alias /pxeboot /var/lib/tftpboot/data
-	<Directory /var/lib/tftpboot/data>
+	Alias /pxeboot '.$file.'/data
+	<Directory '.$file.'/data>
 	DAV On
 	Options Indexes FollowSymLinks
 	Require all granted
@@ -1188,7 +1192,7 @@ setTimeout(fetchData, 1000);
 	}
 	}
 	
-	function TFTPFile($data) {
+	function TFTPFile($data, $file) {
 	if(intval($data) == "0") {
 	$tftpconf = "
 	service tftp
@@ -1198,7 +1202,7 @@ setTimeout(fetchData, 1000);
 	wait		= yes
 	user		= root
 	server		= /usr/sbin/in.tftpd
-	server_args	= -c /var/lib/tftpboot
+	server_args	= -c '.$file.'
 	disable		= no
 	per_source	= 11
 	cps		= 100 2
@@ -1214,7 +1218,7 @@ setTimeout(fetchData, 1000);
 	wait            = yes
 	user            = root
 	server          = /usr/sbin/in.tftpd
-	server_args     = -v -v -v -v -v --map-file /var/lib/tftpboot/map-file /var/lib/tftpboot
+	server_args     = -v -v -v -v -v --map-file '.$file.'/map-file '.$file.'
 	disable         = no
 	# This is a workaround for Fedora, where TFTP will listen only on
 	# IPv6 endpoint, if IPv4 flag is not used.
@@ -1225,6 +1229,7 @@ setTimeout(fetchData, 1000);
 	fwrite($file2, $tftpconf);
 	fclose($file2);
 	}
+
 	function DNSMASQCfg($data) {
 	if(intval($data) == "0") {
 	$select = '#VBox Config
@@ -1269,25 +1274,49 @@ setTimeout(fetchData, 1000);
 	fclose($file3);
 	}
 	
-	function DefaultFile($data) {
+	function DefaultFile($data, $file) {
 	if(intval($data) == "0") {
-	$default = "default menu.c32
+	$default = "default vesamenu.c32
 	prompt 0
 	timeout 100
-
+	
+	MENU COLOR screen      0  #80ffffff #00000000 std      # background colour not covered by the splash image
+	MENU COLOR border      0  #ffffffff #ee000000 std      # The wire-frame border
+	MENU COLOR title       0  #ffff3f7f #ee000000 std      # Menu title text
+	MENU COLOR sel         0  #ff00dfdf #ee000000 std      # Selected menu option
+	MENU COLOR hotsel      0  #ff7f7fff #ee000000 std      # The selected hotkey (set with ^ in MENU LABEL)
+	MENU COLOR unsel       0  #ffffffff #ee000000 std      # Unselected menu options
+	MENU COLOR hotkey      0  #ff7f7fff #ee000000 std      # Unselected hotkeys (set with ^ in MENU LABEL)
+	MENU COLOR tabmsg      0  #c07f7fff #00000000 std      # Tab text
+	MENU COLOR timeout_msg 0  #8000dfdf #00000000 std      # Timout text
+	MENU COLOR timeout     0  #c0ff3f7f #00000000 std      # Timout counter
+	MENU COLOR disabled    0  #807f7f7f #ee000000 std      # Disabled menu options, including SEPARATORs
+	MENU COLOR cmdmark     0  #c000ffff #ee000000 std      # Command line marker - The on the left when editing an option
+	MENU COLOR cmdline     0  #c0ffffff #ee000000 std      # Command line - The text being edited
+	# Options below havent been tested, descriptions may be lacking.
+	MENU COLOR scrollbar   0  #40000000 #00000000 std      # Scroll bar
+	MENU COLOR pwdborder   0  #80ffffff #20ffffff std      # Password box wire-frame border
+	MENU COLOR pwdheader   0  #80ff8080 #20ffffff std      # Password box header
+	MENU COLOR pwdentry    0  #80ffffff #20ffffff std      # Password entry field
+	MENU COLOR help        0  #c0ffffff #00000000 std      # Help text, if set via TEXT HELP ... ENDTEXT
+	
 	# Local Hard Disk pxelinux.cfg default entry
 	menu title PXE Boot Menu By Ali Can
 	LABEL 1
 	MENU LABEL Boot local hard drive
 	MENU AUTOBOOT
 	MENU DEFAULT
-	LOCALBOOT 0";
+	LOCALBOOT 0
+	
+	LABEL memtest
+	MENU LABEL Run Memtest86+
+	LINUX /images/arch/memtest";
 	
 	$file4 = fopen("backup/default", "a");
 	fwrite($file4, $default);
 	fclose($file4);
 	
-	$fp = fopen("/var/lib/tftpboot/pxelinux.cfg/default","wb");
+	$fp = fopen("'.$file.'/pxelinux.cfg/default","wb");
 	fwrite($fp,$default);
 	fclose($fp);
 	} else {

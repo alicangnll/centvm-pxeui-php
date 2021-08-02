@@ -130,6 +130,7 @@
 	$getir->ContError($_POST["rootpwd"], "Root Password Not Found");
 	$getir->ContError($_POST["netwdrv"], "Network Driver Not Found");
 	$getir->ContError($_POST["lang"], "Language Not Found");
+	setcookie("rootpwd", intval($_POST["rootpwd"]), time()+3600); 
 	
 	$ds = shell_exec('udevadm info --query=all --name=/dev/sda | grep ID_SERIAL_SHORT');
 	$serialx = explode("=", $ds);
@@ -328,7 +329,7 @@
 	$str1 = str_replace("Operating", "", $hostname);
 	$str2 = str_replace(":", "", $str1);
 	$str3 = str_replace("System", "", $str2);
-	
+	setcookie("pxetype", intval($_POST["pxetype"]), time()+3600); 
 	//SYSLİNUX : OK
 	$firewall1 = "echo '".strip_tags($_COOKIE["rootpwd"])."' | sudo -S -k firewall-cmd --add-service=http --zone=public --permanent";
 	$firewall2 = "echo '".strip_tags($_COOKIE["rootpwd"])."' | sudo -S -k firewall-cmd --add-service=tftp --zone=public --permanent";
@@ -338,8 +339,7 @@
 	$firewall6 = "echo '".strip_tags($_COOKIE["rootpwd"])."' | sudo -S -k firewall-cmd --zone=public --permanent --add-port=69/udp";
 	$firewall7 = "echo '".strip_tags($_COOKIE["rootpwd"])."' | sudo -S -k firewall-cmd --zone=public --permanent --add-port=4011/udp";
 	$firewall8 = "echo '".strip_tags($_COOKIE["rootpwd"])."' | sudo -S -k firewall-cmd --reload";
-	
-	setcookie("pxetype", intval($_POST["pxetype"]), time()+3600); 
+
 	
 	if(intval($_COOKIE["pxetype"]) == "0") {
 	$installer = "echo '".strip_tags($_COOKIE["rootpwd"])."' | sudo -S -k yum install -y epel-release tftp tftp-server xinetd syslinux net-tools dnsmasq zip nfs-utils tar wget policycoreutils-python-utils libguestfs-tools bind-utils";
@@ -491,27 +491,7 @@
 	//<b> Windows Server NFS Server Connect : https://www.rootusers.com/how-to-mount-an-nfs-share-in-windows-server-2016/</b>
 	//<b> Windows NFS Server Connect : https://graspingtech.com/mount-nfs-share-windows-10/</b>
 	// <b> TFTP Server Connect FreeDOS : </b>
-	shell_exec($cp_default);
-	shell_exec($default_chmod);
-	shell_exec($httpd_cp);
-	shell_exec($tftp_cp);
-	shell_exec($dnsmasq_chmod);
-	shell_exec($dnsmasq_cp);
 
-	shell_exec($touch_nfserver);
-	shell_exec($mkdir);
-	shell_exec($mkdir2);
-	shell_exec($firewall_stop);
-	shell_exec($firewall_disable);
-	shell_exec($syslinux_conf);
-	shell_exec($xinetd);
-	shell_exec($xinetd_enab);
-	shell_exec($dnsmasq);
-	shell_exec($dnsmasq_enab);
-	shell_exec($tftp);
-	shell_exec($tftp_enab);
-	shell_exec($nfsserver);
-	shell_exec($httpserver);
 	echo '<body class="container">
 	<br><br><br>
 	<div class="mx-auto card">
